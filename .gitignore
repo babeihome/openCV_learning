@@ -200,3 +200,7 @@ $RECYCLE.BIN/
  
 # VisualStudioCode
 .vscode
+*.bmp
+*.7z
+/shared_data/201809091-5.mp4
+/shared_data/20180901-1.h264
