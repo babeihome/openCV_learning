@@ -14,11 +14,10 @@ int main(int argc, char* argv[])
 	
 	vector<string> files;
 	getFiles(imagePath, files);
-	int size = files.size();
 
 	// loop of experiments start
 	vector<vector<string>> experiment_sequence;		// multiple experiment register here
-
+	bool debug = true;
 	// experiment describe here
 	// 
 	vector<string> exp1;
@@ -28,23 +27,28 @@ int main(int argc, char* argv[])
 	exp1.push_back("1"); //thining
 	exp1.push_back("2"); //anaylse
 	experiment_sequence.push_back(exp1);	//
-
 	// experiment describe end
 
-	for (int exp_id = 0; exp_id < experiment_sequence.size(); exp_id++) {
 
-		for (int i = 0; i < size; i++)
+
+	for (int exp_id = 0; exp_id < experiment_sequence.size(); exp_id++) {
+		//run into one experiment
+		for (int i = 0; i < files.size(); i++)
 		{
+			//anaylse one image
 			Mat img = imread(files[i], -1);
 			if (img.empty())
 			{
 				cout << "Error: Could not load image" << endl;
 				return 0;
 			}
-			imshow("test",img);
-			waitKey(1);
-
+			//debug part: show the image
+			if (debug) {
+				imshow("test", img);
+				waitKey(1);
+			}
 			// image processing start
+
 		}
 	}
 	waitKey(0);
