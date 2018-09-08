@@ -32,6 +32,7 @@ int main(int argc, char* argv[])
 	Mat img, pre_img, bi_img, aft_img, thin_img, tmp_img;
 
 
+
 	for (int exp_id = 0; exp_id < experiment_sequence.size(); exp_id++) {	
 		
 		double start, stop, durationTime;
