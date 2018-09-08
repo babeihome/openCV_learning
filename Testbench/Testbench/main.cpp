@@ -21,11 +21,11 @@ int main(int argc, char* argv[])
 	// experiment describe here
 	// 
 	queue<string> exp1;
-	exp1.push("11"); // first is pre-process
-	exp1.push("1");  // then binarization
-	exp1.push(""); // then after-process
-	exp1.push("1"); //thining
-	exp1.push("2"); //anaylse
+	exp1.push("0"); // first is pre-process
+	exp1.push("0");  // then binarization
+	exp1.push("0"); // then after-process
+	exp1.push("0"); //thining
+	exp1.push(""); //anaylse
 	experiment_sequence.push(exp1);	//
 	// experiment describe end
 
@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 			}
 			//debug part: show the image
 			if (debug) {
-				imshow("test", img);
+				imshow("origin", img);
 				waitKey(1);
 			}
 			// image processing start
