@@ -10,7 +10,7 @@ using namespace cv;
 int main(int argc, char* argv[])
 {
 	// load data path
-	string imagePath("..\\..\\shared_data\\stm32\\bmp_sequence_5");
+	string imagePath("..\\..\\shared_data\\stm32\\");
 	
 	vector<string> files;
 	getFiles(imagePath, files);
