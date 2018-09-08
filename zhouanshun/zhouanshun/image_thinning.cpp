@@ -96,7 +96,7 @@ uchar Median(uchar n1, uchar n2, uchar n3, uchar n4, uchar n5,
 }
 
 //ÖÐÖµÂË²¨
-void MedianFlitering(const Mat &src, Mat &dst) {
+void MedianFlitering( Mat &src, Mat &dst) {
 	if (!src.data)return;
 	Mat _dst(src.size(), src.type());
 	for (int i = 0; i < src.rows; ++i)
@@ -222,14 +222,14 @@ int main(int argc, char* argv[])
 	//namedWindow("test", 0);
 	//imshow("test", m);
 
-	/*imshow("src", img);
-	imshow("gray", gray);
-	imshow("dst", dst);*/
-	imshow("dilateion", dilateion);
-	//imshow("smooth", smooth);
-	imshow("line", line);
-	imshow("close", close);
-	imshow("line_2", line_2);
+	imshow("src", img);
+	//imshow("gray", gray);
+	//imshow("dst", dst);
+	//("dilateion", dilateion);
+	imshow("smooth", smooth);
+	//imshow("line", line);
+	//imshow("close", close);
+	//imshow("line_2", line_2);
 	waitKey(0);
 
 	return 0;

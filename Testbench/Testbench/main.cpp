@@ -10,7 +10,7 @@ using namespace cv;
 int main(int argc, char* argv[])
 {
 	// load data path
-	string imagePath("..\\..\\shared_data\\stm32\\bmp_sequence_5");
+	string imagePath("..\\..\\shared_data\\stm32\\");
 	
 	vector<string> files;
 	getFiles(imagePath, files);
@@ -21,44 +21,48 @@ int main(int argc, char* argv[])
 	// experiment describe here
 	// 
 	queue<string> exp1;
-	exp1.push("11"); // first is pre-process
-	exp1.push("1");  // then binarization
-	exp1.push(""); // then after-process
-	exp1.push("1"); //thining
-	exp1.push("2"); //anaylse
+	exp1.push("0"); // first is pre-process
+	exp1.push("0");  // then binarization
+	exp1.push("0"); // then after-process
+	exp1.push("0"); //thining
+	exp1.push(""); //anaylse
 	experiment_sequence.push(exp1);	//
 	// experiment describe end
 
+	Mat img, pre_img, bi_img, aft_img, thin_img, tmp_img;
 
 
 	for (int exp_id = 0; exp_id < experiment_sequence.size(); exp_id++) {	
 		
 		double start, stop, durationTime;
 		
+		
+
 		//timing start
 		start = time(NULL);
 
 		//run into one experiment
 		for (int i = 0; i < files.size(); i++)
 		{
+			queue<string> exp_tmp = experiment_sequence.front();
+
+
 			//anaylse one image
-			Mat img = imread(files[i], -1);
+			img = imread(files[i], -1);
 			if (img.empty())
 			{
-				cout << "Error: Could not load image" << endl;
+				std::cout << "Error: Could not load image" << endl;
 				return 0;
 			}
 			//debug part: show the image
 			if (debug) {
-				imshow("test", img);
+				imshow("origin", img);
 				waitKey(1);
 			}
 			// image processing start
-			queue<string> exp_tmp = experiment_sequence.front();
-			experiment_sequence.pop();
+
 
 			int tmp_op;
-			Mat pre_img, bi_img, aft_img, thin_img, tmp_img;
 
 			//pre-process
 			string pre_process = exp_tmp.front();
@@ -109,9 +113,10 @@ int main(int argc, char* argv[])
 				analysis(thin_img, param_list, tmp_op);
 			}
 		}
+		experiment_sequence.pop();
 		stop = time(NULL);
 		durationTime = (double)difftime(stop, start);
-		cout << "Experiment:" << exp_id << "\tTime Consuming:" << durationTime << " s" << endl;
+		std::cout << "Experiment:" << exp_id << "\tTime Consuming:" << durationTime << " s" << endl;
 	}
 	waitKey(0);
 
