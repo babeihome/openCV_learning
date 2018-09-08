@@ -54,17 +54,20 @@ void thinning(Mat &origin_img, Mat &dst_img, int method_code) {
 }
 // the first of pair is k, the second one is b, this function should return the number of valid pair of k & b
 int analysis(Mat &origin_img, vector < pair < float, float >> &kb, int method_code) {
+	
+	vector<Vec2f> lines0;   //定义一个矢量结构用于存放得到的线段矢量集合
+	vector<Vec4i> lines1;
+
 	switch (method_code)
 	{
 	case 0: 	
-		//进行标准霍夫变换
-		vector<Vec2f> lines;            //定义一个矢量结构用于存放得到的线段矢量集合
-		HoughLines(origin_img, lines, 1, CV_PI / 180, 230, 0, 0);
+		//进行标准霍夫变换 
+		HoughLines(origin_img, lines0, 1, CV_PI / 180, 230, 0, 0);
 		break;
 	case 1:
 		//进行累计概率变换
-        vector<Vec4i> lines;
-	    HoughLinesP(origin_img, lines, 1, CV_PI / 180, 200, 30 ,10);
+	    HoughLinesP(origin_img, lines1, 1, CV_PI / 180, 200, 30 ,10);
+		break;
 	default: cout << "no this method, sorry" << endl;
 		break;
 	}
