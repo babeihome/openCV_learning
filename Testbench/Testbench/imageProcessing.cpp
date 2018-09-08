@@ -3,11 +3,17 @@
 using namespace std;
 using namespace cv;
 
+
+
+
+Mat dst;
+
 // don't modify origin_img!!!
 void preProcess(Mat &origin_img, Mat &dst_img, int method_code) {
 	switch (method_code)
 	{
 	case 0:
+		cvtColor(origin_img, dst_img, CV_BGR2GRAY);
 		break;
 	default:
 		break;
@@ -17,6 +23,7 @@ void binarize(Mat &origin_img, Mat &dst_img, int method_code) {
 	switch (method_code)
 	{
 	case 0:
+		threshold(origin_img, dst_img, 0, 255, CV_THRESH_OTSU);
 		break;
 	case 1:
 
@@ -28,6 +35,7 @@ void afterProcess(Mat &origin_img, Mat &dst_img, int method_code) {
 	switch (method_code)
 	{
 	case 0:
+		dst_img = origin_img.clone();
 		break;
 	default:
 		break;
