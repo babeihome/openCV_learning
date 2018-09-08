@@ -10,14 +10,14 @@ using namespace cv;
 int main(int argc, char* argv[])
 {
 	// load data path
-	string imagePath("..\\..\\shared_data\\stm32\\");
+	string imagePath("..\\..\\shared_data\\stm32\\bmp_sequence_5\\");
 	
 	vector<string> files;
 	getFiles(imagePath, files);
 
 	// loop of experiments start
 	queue<queue<string>> experiment_sequence;		// multiple experiment register here
-	bool debug = true;
+	bool debug = false;
 	// experiment describe here
 	// 
 	queue<string> exp1;
@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 	exp1.push("0");  // then binarization
 	exp1.push("0"); // then after-process
 	exp1.push("0"); //thining
-	exp1.push(""); //anaylse
+	exp1.push("0"); //anaylse
 	experiment_sequence.push(exp1);	//
 	// experiment describe end
 
@@ -35,8 +35,6 @@ int main(int argc, char* argv[])
 	for (int exp_id = 0; exp_id < experiment_sequence.size(); exp_id++) {	
 		
 		double start, stop, durationTime;
-		
-		
 
 		//timing start
 		start = time(NULL);
@@ -60,7 +58,7 @@ int main(int argc, char* argv[])
 				waitKey(1);
 			}
 			// image processing start
-
+			
 
 			int tmp_op;
 
@@ -73,7 +71,7 @@ int main(int argc, char* argv[])
 				preProcess(tmp_img, pre_img, tmp_op);
 				tmp_img = pre_img;
 			}
-
+			std::cout << "pre-processing done" << std::endl;
 			//binarization img
 			string bi_process = exp_tmp.front();
 			exp_tmp.pop();
@@ -83,7 +81,7 @@ int main(int argc, char* argv[])
 				binarize(tmp_img, bi_img, tmp_op);
 				tmp_img = bi_img;
 			}
-
+			std::cout << "binarization done" << std::endl;
 			//after processing img
 			string aft_process = exp_tmp.front();
 			exp_tmp.pop();
@@ -93,7 +91,7 @@ int main(int argc, char* argv[])
 				afterProcess(tmp_img, aft_img, tmp_op);
 				tmp_img = aft_img;
 			}
-
+			std::cout << "after-processing done" << std::endl;
 			//thining img
 			string thin_process = exp_tmp.front();
 			exp_tmp.pop();
@@ -103,7 +101,7 @@ int main(int argc, char* argv[])
 				thinning(tmp_img, thin_img, tmp_op);
 				tmp_img = thin_img;
 			}
-
+			std::cout << "thinning processing done" << std::endl;
 			//analyse img
 			string analyse_process = exp_tmp.front();
 			vector<pair<float, float>> param_list;
@@ -112,6 +110,7 @@ int main(int argc, char* argv[])
 				tmp_op = analyse_process[op_id] - 48;   // ASCII code of '0' is 48
 				analysis(thin_img, param_list, tmp_op);
 			}
+			std::cout << "analysis done" << std::endl;
 		}
 		experiment_sequence.pop();
 		stop = time(NULL);
