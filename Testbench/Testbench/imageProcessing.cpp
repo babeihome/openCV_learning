@@ -4,9 +4,6 @@
 using namespace std;
 using namespace cv;
 
-
-
-
 Mat dst;
 
 // don't modify origin_img!!!
@@ -67,7 +64,6 @@ int analysis(Mat &origin_img, vector < pair < float, float >> &kb, int method_co
 	return 0;
 }
 
-<<<<<<< HEAD
 //求九个数的中值
 uchar Median(uchar n1, uchar n2, uchar n3, uchar n4, uchar n5,
 	uchar n6, uchar n7, uchar n8, uchar n9) {
@@ -112,9 +108,9 @@ void MedianFlitering(Mat &src, Mat &dst) {
 				_dst.at<Vec3b>(i, j) = src.at<Vec3b>(i, j);
 		}
 	_dst.copyTo(dst);//拷贝
-=======
-void chao_thinimage(Mat &srcimage)//单通道、二值化后的图像
+}
 
+void chao_thinimage(Mat &srcimage)//单通道、二值化后的图像
 {
 
 	vector<Point> deletelist1;
@@ -380,5 +376,4 @@ void chao_thinimage(Mat &srcimage)//单通道、二值化后的图像
 		deletelist1.clear();
 
 	}
->>>>>>> f626174f6c30a160c1c6bcd3b3c94029d6a43da8
 }
