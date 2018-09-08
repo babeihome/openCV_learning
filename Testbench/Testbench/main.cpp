@@ -29,23 +29,29 @@ int main(int argc, char* argv[])
 	experiment_sequence.push(exp1);	//
 	// experiment describe end
 
+	Mat img, pre_img, bi_img, aft_img, thin_img, tmp_img;
 
 
 	for (int exp_id = 0; exp_id < experiment_sequence.size(); exp_id++) {	
 		
 		double start, stop, durationTime;
 		
+		
+
 		//timing start
 		start = time(NULL);
 
 		//run into one experiment
 		for (int i = 0; i < files.size(); i++)
 		{
+			queue<string> exp_tmp = experiment_sequence.front();
+
+
 			//anaylse one image
-			Mat img = imread(files[i], -1);
+			img = imread(files[i], -1);
 			if (img.empty())
 			{
-				cout << "Error: Could not load image" << endl;
+				std::cout << "Error: Could not load image" << endl;
 				return 0;
 			}
 			//debug part: show the image
@@ -54,11 +60,9 @@ int main(int argc, char* argv[])
 				waitKey(1);
 			}
 			// image processing start
-			queue<string> exp_tmp = experiment_sequence.front();
-			experiment_sequence.pop();
+
 
 			int tmp_op;
-			Mat pre_img, bi_img, aft_img, thin_img, tmp_img;
 
 			//pre-process
 			string pre_process = exp_tmp.front();
@@ -109,9 +113,10 @@ int main(int argc, char* argv[])
 				analysis(thin_img, param_list, tmp_op);
 			}
 		}
+		experiment_sequence.pop();
 		stop = time(NULL);
 		durationTime = (double)difftime(stop, start);
-		cout << "Experiment:" << exp_id << "\tTime Consuming:" << durationTime << " s" << endl;
+		std::cout << "Experiment:" << exp_id << "\tTime Consuming:" << durationTime << " s" << endl;
 	}
 	waitKey(0);
 
