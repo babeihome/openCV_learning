@@ -3,7 +3,7 @@
 using namespace std;
 using namespace cv;
 
-
+// don't modify origin_img!!!
 void preProcess(Mat &origin_img, Mat &dst_img, int method_code) {
 	switch (method_code)
 	{
@@ -18,6 +18,8 @@ void binarize(Mat &origin_img, Mat &dst_img, int method_code) {
 	{
 	case 0:
 		break;
+	case 1:
+
 	default:
 		break;
 	}
