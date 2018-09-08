@@ -3,7 +3,7 @@
 using namespace std;
 using namespace cv;
 
-void thinImage(Mat & srcImg) {
+void thinImage(Mat srcImg) {
 	vector<Point> deleteList;
 	int neighbourhood[9];
 	int nl = srcImg.rows;
@@ -179,6 +179,7 @@ Mat combineImages(vector<Mat> imgs,//@parameter1:需要显示的图像组
 };
 
 
+
 int main(int argc, char* argv[])
 {
 	// image path from command argv
@@ -213,6 +214,9 @@ int main(int argc, char* argv[])
 	Mat line_2;
 	line_2 = close.clone();
 	thinImage(line_2);
+
+	//vector<Vec3f> circles;
+	//HoughCircles(line, circles, CV_HOUGH_GRADIENT, 1.5, 10, 200, 100, 0, 0);
 
 	//Mat combineImages(vector<Mat> imgs, int col, int row, bool hasMargin);//函数声明
 	//vector<Mat> imgs(2);
