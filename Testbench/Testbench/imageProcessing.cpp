@@ -4,6 +4,11 @@
 using namespace std;
 using namespace cv;
 
+
+
+
+Mat dst;
+
 // don't modify origin_img!!!
 void preProcess(Mat &origin_img, Mat &dst_img, int method_code) {
 	switch (method_code)
@@ -24,6 +29,7 @@ void binarize(Mat &origin_img, Mat &dst_img, int method_code) {
 	switch (method_code)
 	{
 	case 0:
+		threshold(origin_img, dst_img, 0, 255, CV_THRESH_OTSU);
 		break;
 	case 1:
 
