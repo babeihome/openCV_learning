@@ -11,13 +11,17 @@ void preProcess(Mat &origin_img, Mat &dst_img, int method_code) {
 	switch (method_code)
 	{
 	case 0:
-		cvtColor(origin_img, dst_img, CV_BGR2GRAY);
+		cvtColor(origin_img, dst_img, CV_RGB2GRAY);
 	case 1: {
 		Mat smooth;
 		MedianFlitering(origin_img, smooth);                 //中值滤波效果一般
 		cvtColor(smooth, dst_img, CV_BGR2GRAY);
 	}
-		
+	case 2: {
+		Mat aChannels[3];
+		split(origin_img, aChannels);
+		dst_img = aChannels[2];
+	}
 	default:
 		break;
 	}

@@ -17,11 +17,11 @@ int main(int argc, char* argv[])
 
 	// loop of experiments start
 	queue<queue<string>> experiment_sequence;		// multiple experiment register here
-	bool debug = false;
+	bool debug = true;
 	// experiment describe here
 	// 
 	queue<string> exp1;
-	exp1.push("0"); // first is pre-process
+	exp1.push("2"); // first is pre-process
 	exp1.push("0");  // then binarization
 	exp1.push("0"); // then after-process
 	exp1.push("0"); //thining
@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
 	for (int exp_id = 0; exp_id < experiment_sequence.size(); exp_id++) {	
 		
 		double start, stop, durationTime;
-
+		double sub_start, sub_stop, sub_d;
 		//timing start
 		start = time(NULL);
 
@@ -63,6 +63,7 @@ int main(int argc, char* argv[])
 			int tmp_op;
 
 			//pre-process
+			sub_start = clock();
 			string pre_process = exp_tmp.front();
 			exp_tmp.pop();
 			tmp_img = img;
@@ -71,7 +72,16 @@ int main(int argc, char* argv[])
 				preProcess(tmp_img, pre_img, tmp_op);
 				tmp_img = pre_img;
 			}
-			std::cout << "pre-processing done" << std::endl;
+			sub_stop = clock();
+			std::cout << "pre-processing done:" << (sub_stop - sub_start)/CLK_TCK << "s" << std::endl;
+
+			//debug part: show the image
+			if (debug) {
+				imshow("pre", pre_img);
+				waitKey(1);
+			}
+
+
 			//binarization img
 			string bi_process = exp_tmp.front();
 			exp_tmp.pop();
@@ -82,6 +92,13 @@ int main(int argc, char* argv[])
 				tmp_img = bi_img;
 			}
 			std::cout << "binarization done" << std::endl;
+			//debug part: show the image
+			if (debug) {
+				imshow("black", bi_img);
+				waitKey(1);
+			}
+
+
 			//after processing img
 			string aft_process = exp_tmp.front();
 			exp_tmp.pop();
@@ -92,6 +109,12 @@ int main(int argc, char* argv[])
 				tmp_img = aft_img;
 			}
 			std::cout << "after-processing done" << std::endl;
+			//debug part: show the image
+			if (debug) {
+				imshow("after", aft_img);
+				waitKey(1);
+			}
+
 			//thining img
 			string thin_process = exp_tmp.front();
 			exp_tmp.pop();
@@ -102,6 +125,12 @@ int main(int argc, char* argv[])
 				tmp_img = thin_img;
 			}
 			std::cout << "thinning processing done" << std::endl;
+			//debug part: show the image
+			if (debug) {
+				imshow("thin", thin_img);
+				waitKey(1);
+			}
+
 			//analyse img
 			string analyse_process = exp_tmp.front();
 			vector<pair<float, float>> param_list;
