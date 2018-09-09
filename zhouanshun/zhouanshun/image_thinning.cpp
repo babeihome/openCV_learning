@@ -75,6 +75,282 @@ void thinImage(Mat & srcImg) {
 	}
 }
 
+void thinImage_2(Mat & srcImg) {
+	vector<Point> deleteList;
+	int neighbourhood[9];
+	int distinguish[9];
+	int nl = srcImg.rows;
+	int nc = srcImg.cols;
+	bool inOddIterations = true;
+	while (true) {
+		for (int j = 3; j < (nl - 2); j = j++) {
+			uchar* data_last = srcImg.ptr<uchar>(j - 1);
+			uchar* data = srcImg.ptr<uchar>(j);
+			uchar* data_next = srcImg.ptr<uchar>(j + 1);
+			uchar* data_last_2 = srcImg.ptr<uchar>(j - 2);
+			uchar* data_last_3 = srcImg.ptr<uchar>(j - 3);
+			uchar* data_next_2 = srcImg.ptr<uchar>(j + 2);
+			//uchar* data_next_3 = srcImg.ptr<uchar>(j + 3);
+			for (int i = 4; i < (nc - 3); i = i++) {
+				distinguish[0] = (data[i] + data_last[i] + data_last[i + 1] + data[i + 1]);
+				distinguish[1] = (data_last_2[i] + data_last_3[i] + data_last_2[i + 1] + data_last_3[i + 1]);
+				distinguish[2] = (data_last_2[i + 2] + data_last_3[i + 2] + data_last_2[i + 3] + data_last_3[i + 3]);
+				distinguish[3] = (data[i + 2] + data_last[i + 2] + data[i + 3] + data_last[i + 3]);
+				distinguish[4] = (data_next[i + 2] + data_next_2[i + 2] + data_next[i + 3] + data_next_2[i + 3]);
+				distinguish[5] = (data_next[i] + data_next_2[i] + data_next[i + 1] + data_next_2[i + 1]);
+				distinguish[6] = (data_next[i - 2] + data_next_2[i - 2] + data_next[i - 1] + data_next_2[i - 1]);
+				distinguish[7] = (data[i - 2] + data_last[i - 2] + data_last[i - 1] + data[i - 1]);
+				distinguish[8] = (data_last_2[i - 2] + data_last_3[i - 2] + data_last_2[i - 1] + data_last_3[i - 1]);
+				if (distinguish[0] >= 1020) {
+					int whitePointCount = 0;
+					neighbourhood[0] = 1;
+					if (distinguish[1] >= 1020) neighbourhood[1] = 1;
+					else  neighbourhood[1] = 0;
+					if (distinguish[2] >= 1020) neighbourhood[2] = 1;
+					else  neighbourhood[2] = 0;
+					if (distinguish[3] >= 1020) neighbourhood[3] = 1;
+					else  neighbourhood[3] = 0;
+					if (distinguish[4] >= 1020) neighbourhood[4] = 1;
+					else  neighbourhood[4] = 0;
+					if (distinguish[5] >= 1020) neighbourhood[5] = 1;
+					else  neighbourhood[5] = 0;
+					if (distinguish[6] >= 1020) neighbourhood[6] = 1;
+					else  neighbourhood[6] = 0;
+					if (distinguish[7] >= 1020) neighbourhood[7] = 1;
+					else  neighbourhood[7] = 0;
+					if (distinguish[8] >= 1020) neighbourhood[8] = 1;
+					else  neighbourhood[8] = 0;					
+					for (int k = 1; k < 9; k++) {
+						whitePointCount += neighbourhood[k];
+					}
+					if ((whitePointCount >= 2) && (whitePointCount <= 6)) {
+						int ap = 0;
+						if ((neighbourhood[1] == 0) && (neighbourhood[2] == 1)) ap++;
+						if ((neighbourhood[2] == 0) && (neighbourhood[3] == 1)) ap++;
+						if ((neighbourhood[3] == 0) && (neighbourhood[4] == 1)) ap++;
+						if ((neighbourhood[4] == 0) && (neighbourhood[5] == 1)) ap++;
+						if ((neighbourhood[5] == 0) && (neighbourhood[6] == 1)) ap++;
+						if ((neighbourhood[6] == 0) && (neighbourhood[7] == 1)) ap++;
+						if ((neighbourhood[7] == 0) && (neighbourhood[8] == 1)) ap++;
+						if ((neighbourhood[8] == 0) && (neighbourhood[1] == 1)) ap++;
+						if (ap == 1) {
+							if (inOddIterations && (neighbourhood[3] * neighbourhood[5] * neighbourhood[7] == 0)
+								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[5] == 0)) {
+								deleteList.push_back(Point(i, j));
+								deleteList.push_back(Point(i + 1, j));
+								deleteList.push_back(Point(i, j + 1));
+								deleteList.push_back(Point(i + 1, j + 1));
+							}
+							else if (!inOddIterations && (neighbourhood[1] * neighbourhood[5] * neighbourhood[7] == 0)
+								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[7] == 0)) {
+								deleteList.push_back(Point(i, j));
+								deleteList.push_back(Point(i + 1, j));
+								deleteList.push_back(Point(i, j + 1));
+								deleteList.push_back(Point(i + 1, j + 1));
+							}
+						}
+					}
+				}
+			}
+		}
+		if (deleteList.size() == 0)
+			break;
+		for (size_t i = 0; i < deleteList.size(); i++) {
+			Point tem;
+			tem = deleteList[i];
+			uchar* data = srcImg.ptr<uchar>(tem.y);
+			data[tem.x] = 0;
+		}
+		deleteList.clear();
+
+		inOddIterations = !inOddIterations;
+	}
+}
+
+void thinImage_3(Mat & srcImg) {
+	vector<Point> deleteList;
+	int neighbourhood[9];
+	int distinguish[9];
+	int nl = srcImg.rows;
+	int nc = srcImg.cols;
+	bool inOddIterations = true;
+	while (true) {
+		for (int j = 3; j < (nl - 2); j = j++) {
+			uchar* data_last = srcImg.ptr<uchar>(j - 1);
+			uchar* data = srcImg.ptr<uchar>(j);
+			uchar* data_next = srcImg.ptr<uchar>(j + 1);
+			uchar* data_last_2 = srcImg.ptr<uchar>(j - 2);
+			uchar* data_last_3 = srcImg.ptr<uchar>(j - 3);
+			uchar* data_next_2 = srcImg.ptr<uchar>(j + 2);
+			//uchar* data_next_3 = srcImg.ptr<uchar>(j + 3);
+			for (int i = 4; i < (nc - 3); i = i++) {
+				distinguish[0] = (data[i] + data_last[i] + data_last[i + 1] + data[i + 1]);
+				distinguish[1] = (data_last_2[i] + data_last_2[i + 1]);
+				distinguish[2] = (data_last_2[i + 2]);
+				distinguish[3] = (data[i + 2] + data_last[i + 2]);
+				distinguish[4] = (data_next[i + 2]);
+				distinguish[5] = (data_next[i] + data_next[i + 1]);
+				distinguish[6] = (data_next[i - 1]);
+				distinguish[7] = (data_last[i - 1] + data[i - 1]);
+				distinguish[8] = (data_last_2[i - 1]);
+				if (distinguish[0] == 1020) {
+					int whitePointCount = 0;
+					neighbourhood[0] = 1;
+					if (distinguish[1] >= 510) neighbourhood[1] = 1;
+					else  neighbourhood[1] = 0;
+					if (distinguish[2] >= 255) neighbourhood[2] = 1;
+					else  neighbourhood[2] = 0;
+					if (distinguish[3] >= 510) neighbourhood[3] = 1;
+					else  neighbourhood[3] = 0;
+					if (distinguish[4] >= 255) neighbourhood[4] = 1;
+					else  neighbourhood[4] = 0;
+					if (distinguish[5] >= 510) neighbourhood[5] = 1;
+					else  neighbourhood[5] = 0;
+					if (distinguish[6] >= 255) neighbourhood[6] = 1;
+					else  neighbourhood[6] = 0;
+					if (distinguish[7] >= 510) neighbourhood[7] = 1;
+					else  neighbourhood[7] = 0;
+					if (distinguish[8] >= 255) neighbourhood[8] = 1;
+					else  neighbourhood[8] = 0;
+					for (int k = 1; k < 9; k++) {
+						whitePointCount += neighbourhood[k];
+					}
+					if ((whitePointCount >= 2) && (whitePointCount <= 6)) {
+						int ap = 0;
+						if ((neighbourhood[1] == 0) && (neighbourhood[2] == 1)) ap++;
+						if ((neighbourhood[2] == 0) && (neighbourhood[3] == 1)) ap++;
+						if ((neighbourhood[3] == 0) && (neighbourhood[4] == 1)) ap++;
+						if ((neighbourhood[4] == 0) && (neighbourhood[5] == 1)) ap++;
+						if ((neighbourhood[5] == 0) && (neighbourhood[6] == 1)) ap++;
+						if ((neighbourhood[6] == 0) && (neighbourhood[7] == 1)) ap++;
+						if ((neighbourhood[7] == 0) && (neighbourhood[8] == 1)) ap++;
+						if ((neighbourhood[8] == 0) && (neighbourhood[1] == 1)) ap++;
+						if (ap == 1) {
+							if (inOddIterations && (neighbourhood[3] * neighbourhood[5] * neighbourhood[7] == 0)
+								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[5] == 0)) {
+								deleteList.push_back(Point(i, j));
+								deleteList.push_back(Point(i + 1, j));
+								deleteList.push_back(Point(i, j + 1));
+								deleteList.push_back(Point(i + 1, j + 1));
+							}
+							else if (!inOddIterations && (neighbourhood[1] * neighbourhood[5] * neighbourhood[7] == 0)
+								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[7] == 0)) {
+								deleteList.push_back(Point(i, j));
+								deleteList.push_back(Point(i + 1, j));
+								deleteList.push_back(Point(i, j + 1));
+								deleteList.push_back(Point(i + 1, j + 1));
+							}
+						}
+					}
+				}
+			}
+		}
+		if (deleteList.size() == 0)
+			break;
+		for (size_t i = 0; i < deleteList.size(); i++) {
+			Point tem;
+			tem = deleteList[i];
+			uchar* data = srcImg.ptr<uchar>(tem.y);
+			data[tem.x] = 0;
+		}
+		deleteList.clear();
+
+		inOddIterations = !inOddIterations;
+	}
+}
+
+void thinImage_4(Mat & srcImg) {
+	vector<Point> deleteList;
+	int neighbourhood[9];
+	int distinguish[9];
+	int nl = srcImg.rows;
+	int nc = srcImg.cols;
+	bool inOddIterations = true;
+	while (true) {
+		for (int j = 3; j < (nl - 2); j = j++) {
+			uchar* data_last = srcImg.ptr<uchar>(j - 1);
+			uchar* data = srcImg.ptr<uchar>(j);
+			uchar* data_next = srcImg.ptr<uchar>(j + 1);
+			uchar* data_last_2 = srcImg.ptr<uchar>(j - 2);
+			uchar* data_last_3 = srcImg.ptr<uchar>(j - 3);
+			uchar* data_next_2 = srcImg.ptr<uchar>(j + 2);
+			//uchar* data_next_3 = srcImg.ptr<uchar>(j + 3);
+			for (int i = 4; i < (nc - 3); i = i++) {
+				distinguish[0] = (data[i] + data[i + 1]);
+				distinguish[1] = (data_last[i] + data_last[i + 1]);
+				distinguish[2] = (data_last[i + 2]);
+				distinguish[3] = (data[i + 2]);
+				distinguish[4] = (data_next[i + 2]);
+				distinguish[5] = (data_next[i] + data_next[i + 1]);
+				distinguish[6] = (data_next[i - 1]);
+				distinguish[7] = (data[i - 1]);
+				distinguish[8] = (data_last[i - 1]);
+				if (distinguish[0] == 510) {
+					int whitePointCount = 0;
+					neighbourhood[0] = 1;
+					if (distinguish[1] == 510) neighbourhood[1] = 1;
+					else  neighbourhood[1] = 0;
+					if (distinguish[2] >= 255) neighbourhood[2] = 1;
+					else  neighbourhood[2] = 0;
+					if (distinguish[3] >= 255) neighbourhood[3] = 1;
+					else  neighbourhood[3] = 0;
+					if (distinguish[4] >= 255) neighbourhood[4] = 1;
+					else  neighbourhood[4] = 0;
+					if (distinguish[5] == 510) neighbourhood[5] = 1;
+					else  neighbourhood[5] = 0;
+					if (distinguish[6] >= 255) neighbourhood[6] = 1;
+					else  neighbourhood[6] = 0;
+					if (distinguish[7] >= 255) neighbourhood[7] = 1;
+					else  neighbourhood[7] = 0;
+					if (distinguish[8] >= 255) neighbourhood[8] = 1;
+					else  neighbourhood[8] = 0;
+					for (int k = 1; k < 9; k++) {
+						whitePointCount += neighbourhood[k];
+					}
+					if ((whitePointCount >= 2) && (whitePointCount <= 6)) {
+						int ap = 0;
+						if ((neighbourhood[1] == 0) && (neighbourhood[2] == 1)) ap++;
+						if ((neighbourhood[2] == 0) && (neighbourhood[3] == 1)) ap++;
+						if ((neighbourhood[3] == 0) && (neighbourhood[4] == 1)) ap++;
+						if ((neighbourhood[4] == 0) && (neighbourhood[5] == 1)) ap++;
+						if ((neighbourhood[5] == 0) && (neighbourhood[6] == 1)) ap++;
+						if ((neighbourhood[6] == 0) && (neighbourhood[7] == 1)) ap++;
+						if ((neighbourhood[7] == 0) && (neighbourhood[8] == 1)) ap++;
+						if ((neighbourhood[8] == 0) && (neighbourhood[1] == 1)) ap++;
+						if (ap == 1) {
+							if (inOddIterations && (neighbourhood[3] * neighbourhood[5] * neighbourhood[7] == 0)
+								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[5] == 0)&&(neighbourhood[5])) {
+								deleteList.push_back(Point(i, j));
+								deleteList.push_back(Point(i + 1, j));
+								deleteList.push_back(Point(i, j + 1));
+								deleteList.push_back(Point(i + 1, j + 1));
+							}
+							else if (!inOddIterations && (neighbourhood[1] * neighbourhood[5] * neighbourhood[7] == 0)
+								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[7] == 0)&&(neighbourhood[5])) {
+								deleteList.push_back(Point(i, j));
+								deleteList.push_back(Point(i + 1, j));
+								deleteList.push_back(Point(i, j + 1));
+								deleteList.push_back(Point(i + 1, j + 1));
+							}
+						}
+					}
+				}
+			}
+		}
+		if (deleteList.size() == 0)
+			break;
+		for (size_t i = 0; i < deleteList.size(); i++) {
+			Point tem;
+			tem = deleteList[i];
+			uchar* data = srcImg.ptr<uchar>(tem.y);
+			data[tem.x] = 0;
+		}
+		deleteList.clear();
+
+		inOddIterations = !inOddIterations;
+	}
+}
+
 //求九个数的中值
 uchar Median(uchar n1, uchar n2, uchar n3, uchar n4, uchar n5,
 	uchar n6, uchar n7, uchar n8, uchar n9) {
@@ -183,7 +459,7 @@ int main(int argc, char* argv[])
 {
 	// image path from command argv
 	//Mat img = imread(argv[1], -1);
-	String imagePath("../../shared_data/stm32/path3.jpg");
+	String imagePath("../../shared_data/stm32/path1.jpg");
 	Mat img = imread(imagePath, -1);
 	if (img.empty())
 	{
@@ -208,7 +484,7 @@ int main(int argc, char* argv[])
 
 	Mat line;
 	line = dilateion.clone();   //克隆二值化图像
-	thinImage(line);
+	thinImage_4(line);
 
 	Mat line_2;
 	line_2 = close.clone();
@@ -221,13 +497,14 @@ int main(int argc, char* argv[])
 	//Mat m = combineImages(imgs, 1, 2, true);
 	//namedWindow("test", 0);
 	//imshow("test", m);
-
-	imshow("src", img);
+	Mat small;
+	
+	//imshow("src", img);
 	//imshow("gray", gray);
 	//imshow("dst", dst);
 	//("dilateion", dilateion);
-	imshow("smooth", smooth);
-	//imshow("line", line);
+	//imshow("smooth", smooth);
+	imshow("line", line);
 	//imshow("close", close);
 	//imshow("line_2", line_2);
 	waitKey(0);
