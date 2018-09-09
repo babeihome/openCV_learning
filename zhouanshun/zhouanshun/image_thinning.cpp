@@ -221,7 +221,8 @@ int main(int argc, char* argv[])
 	//Mat m = combineImages(imgs, 1, 2, true);
 	//namedWindow("test", 0);
 	//imshow("test", m);
-
+	Mat small;
+	
 	imshow("src", img);
 	//imshow("gray", gray);
 	//imshow("dst", dst);
