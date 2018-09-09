@@ -12,15 +12,23 @@ void preProcess(Mat &origin_img, Mat &dst_img, int method_code) {
 	{
 	case 0:
 		cvtColor(origin_img, dst_img, CV_RGB2GRAY);
+		break;
 	case 1: {
 		Mat smooth;
 		MedianFlitering(origin_img, smooth);                 //中值滤波效果一般
 		cvtColor(smooth, dst_img, CV_BGR2GRAY);
-	}
+		break;
+	}	
 	case 2: {
 		Mat aChannels[3];
 		split(origin_img, aChannels);
 		dst_img = aChannels[2];
+		break;
+	}
+	case 3:
+	{
+		resize(origin_img, dst_img, Size(origin_img.cols / 2, origin_img.rows / 2), 0, 0, INTER_LINEAR);
+		break;
 	}
 	default:
 		break;
@@ -42,7 +50,8 @@ void afterProcess(Mat &origin_img, Mat &dst_img, int method_code) {
 	switch (method_code)
 	{
 	case 0:
-		dilate(origin_img, dst_img, Mat(), Point(), 5);                  //膨胀5次
+		dilate(origin_img, dst_img, Mat(), Point(), 5); //膨胀5次
+		break;
 	default:
 		break;
 	}
@@ -70,6 +79,7 @@ int analysis(Mat &origin_img, vector < pair < float, float >> &kb, int method_co
 		//进行累计概率变换
 		vector<Vec4i> lines;
 		HoughLinesP(origin_img, lines, 1, CV_PI / 180, 200, 30, 10);
+		break;
 	}
 	default: cout << "no this method, sorry" << endl;
 		break;

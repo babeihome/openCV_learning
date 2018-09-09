@@ -17,11 +17,11 @@ int main(int argc, char* argv[])
 
 	// loop of experiments start
 	queue<queue<string>> experiment_sequence;		// multiple experiment register here
-	bool debug = true;
+	bool debug = false;
 	// experiment describe here
 	// 
 	queue<string> exp1;
-	exp1.push("2"); // first is pre-process
+	exp1.push("30"); // first is pre-process
 	exp1.push("0");  // then binarization
 	exp1.push("0"); // then after-process
 	exp1.push("0"); //thining
@@ -55,6 +55,9 @@ int main(int argc, char* argv[])
 			}
 			//debug part: show the image
 			if (debug) {
+				namedWindow("origin", 0);
+				resizeWindow("origin", 640, 480);
+				moveWindow("origin", 0, 0);
 				imshow("origin", img);
 				waitKey(1);
 			}
@@ -78,12 +81,16 @@ int main(int argc, char* argv[])
 
 			//debug part: show the image
 			if (debug) {
+				namedWindow("pre", 0);
+				resizeWindow("pre", 640, 480);
+				moveWindow("pre", 640, 0);
 				imshow("pre", pre_img);
 				waitKey(1);
 			}
 
 
 			//binarization img
+			sub_start = clock();
 			string bi_process = exp_tmp.front();
 			exp_tmp.pop();
 			tmp_img = pre_img;
@@ -95,8 +102,13 @@ int main(int argc, char* argv[])
 			std::cout << "binarization done" << std::endl;
 			//debug part: show the image
 			if (debug) {
+				namedWindow("black", 0);
+				resizeWindow("black", 640, 480);
+				moveWindow("black", 0, 480);
 				imshow("black", bi_img);
-				waitKey(1);
+				//waitKey(1);
+				sub_stop = clock();
+				std::cout << "pre-processing done:" << (sub_stop - sub_start) / CLK_TCK << "s" << std::endl;
 			}
 
 
@@ -112,8 +124,8 @@ int main(int argc, char* argv[])
 			std::cout << "after-processing done" << std::endl;
 			//debug part: show the image
 			if (debug) {
-				imshow("after", aft_img);
-				waitKey(1);
+				//imshow("after", aft_img);
+				//waitKey(1);
 			}
 
 			//thining img
@@ -128,6 +140,9 @@ int main(int argc, char* argv[])
 			std::cout << "thinning processing done" << std::endl;
 			//debug part: show the image
 			if (debug) {
+				namedWindow("thin", 0);
+				resizeWindow("thin", 640, 480);
+				moveWindow("thin", 640, 480);
 				imshow("thin", thin_img);
 				waitKey(1);
 			}
