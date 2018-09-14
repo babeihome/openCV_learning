@@ -419,14 +419,14 @@ void thinImage_5(Mat & srcImg) {
 						if ((neighbourhood[8] == 0) && (neighbourhood[1] == 1)) ap++;
 						if (ap == 1) {
 							if (inOddIterations && (neighbourhood[3] * neighbourhood[5] * neighbourhood[7] == 0)
-								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[5] == 0) && (neighbourhood[5])) {
+								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[5] == 0)) {
 								deleteList.push_back(Point(i, j));
 								deleteList.push_back(Point(i + 1, j));
 								deleteList.push_back(Point(i, j + 1));
 								deleteList.push_back(Point(i + 1, j + 1));
 							}
 							else if (!inOddIterations && (neighbourhood[1] * neighbourhood[5] * neighbourhood[7] == 0)
-								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[7] == 0) && (neighbourhood[5])) {
+								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[7] == 0)) {
 								deleteList.push_back(Point(i, j));
 								deleteList.push_back(Point(i + 1, j));
 								deleteList.push_back(Point(i, j + 1));
