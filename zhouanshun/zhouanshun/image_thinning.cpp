@@ -466,11 +466,17 @@ void thinImage_6(Mat &srcImg, int coresize) {
 	int downsize = 2 * coresize - 1;
 	bool inOddIterations = true;
 	int loop_num = 0;
+	int threshold = 255;
 	while (true) {
-		int offset = (int)inOddIterations;
+		int offset = (int)inOddIterations *0;
 		loop_num++;
 		for (int j = (upsize + offset) ; j < (nl - downsize - 1); j = j + coresize)
 		{
+			// get the data array, n1 is the offset of rows
+			for (int n1 = -coresize; n1 < 2 * coresize; n1++) {
+				groupdata[coresize + n1] = srcImg.ptr<uchar>(j + n1);
+			}
+			/*
 			for (int n1 = 1; n1 <= upsize; n1++) {
 				groupdata[upsize - n1] = srcImg.ptr<uchar>(j - n1);
 			}
@@ -478,40 +484,42 @@ void thinImage_6(Mat &srcImg, int coresize) {
 			for (int n1 = 1; n1 <= downsize; n1++) {
 				groupdata[upsize + n1] = srcImg.ptr<uchar>(j + n1);
 			}
+			*/
 			for (int i = upsize + offset; i < (nc - downsize); i = i + coresize) {
 				for (int n4 = 0; n4 <= 8; n4++)
 					distinguish[n4] = 0;  //initialize the distinguish				
-				for (int n2 = 0; n2 < coresize; n2++) {
-					for (int n3 = 0; n3 < coresize; n3++) {
-						distinguish[0] += groupdata[upsize + n2][i + n3];
+				for (int n2 = 0; n2 < coresize; n2++) {	//n2 is offset of rows
+					for (int n3 = 0; n3 < coresize; n3++) {	//n3 is offset of columns
+						distinguish[0] += groupdata[coresize + n2][i + n3];
 						distinguish[1] += groupdata[n2][i + n3];
 						distinguish[2] += groupdata[n2][i + coresize + n3];
-						distinguish[3] += groupdata[upsize + n2][i + coresize + n3];
-						distinguish[4] += groupdata[2 * upsize + n2][i + coresize + n3];
-						distinguish[5] += groupdata[2 * upsize + n2][i + n3];
-						distinguish[6] += groupdata[2 * upsize + n2][i - coresize + n3];
-						distinguish[7] += groupdata[upsize + n2][i -coresize + n3];
+						distinguish[3] += groupdata[coresize + n2][i + coresize + n3];
+						distinguish[4] += groupdata[2 * coresize + n2][i + coresize + n3];
+						distinguish[5] += groupdata[2 * coresize + n2][i + n3];
+						distinguish[6] += groupdata[2 * coresize + n2][i - coresize + n3];
+						distinguish[7] += groupdata[coresize + n2][i -coresize + n3];
 						distinguish[8] += groupdata[n2][i - coresize + n3];
 					}
 				}
-				if (distinguish[0] >= 255) {
+
+				if (distinguish[0] >= threshold) {
 					int whitePointCount = 0;
 					neighbourhood[0] = 1;
-					if (distinguish[1] >= 255) neighbourhood[1] = 1;
+					if (distinguish[1] >= threshold) neighbourhood[1] = 1;
 					else  neighbourhood[1] = 0;
-					if (distinguish[2] >= 255) neighbourhood[2] = 1;
+					if (distinguish[2] >= threshold) neighbourhood[2] = 1;
 					else  neighbourhood[2] = 0;
-					if (distinguish[3] >= 255) neighbourhood[3] = 1;
+					if (distinguish[3] >= threshold) neighbourhood[3] = 1;
 					else  neighbourhood[3] = 0;
-					if (distinguish[4] >= 255) neighbourhood[4] = 1;
+					if (distinguish[4] >= threshold) neighbourhood[4] = 1;
 					else  neighbourhood[4] = 0;
-					if (distinguish[5] >= 255) neighbourhood[5] = 1;
+					if (distinguish[5] >= threshold) neighbourhood[5] = 1;
 					else  neighbourhood[5] = 0;
-					if (distinguish[6] >= 255) neighbourhood[6] = 1;
+					if (distinguish[6] >= threshold) neighbourhood[6] = 1;
 					else  neighbourhood[6] = 0;
-					if (distinguish[7] >= 255) neighbourhood[7] = 1;
+					if (distinguish[7] >= threshold) neighbourhood[7] = 1;
 					else  neighbourhood[7] = 0;
-					if (distinguish[8] >= 255) neighbourhood[8] = 1;
+					if (distinguish[8] >= threshold) neighbourhood[8] = 1;
 					else  neighbourhood[8] = 0;
 					for (int k = 1; k < 9; k++) {
 						whitePointCount += neighbourhood[k];
@@ -531,7 +539,7 @@ void thinImage_6(Mat &srcImg, int coresize) {
 								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[5] == 0)) {
 								for (int n5 = 0; n5 < coresize; n5++) {
 									for (int n6 = 0; n6 < coresize; n6++) {
-										deleteList.push_back(Point(j + n5, i + n6));
+										deleteList.push_back(Point(i + n6, j + n5));
 									}
 								}							
 							}
@@ -539,7 +547,7 @@ void thinImage_6(Mat &srcImg, int coresize) {
 								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[7] == 0)) {
 								for (int n5 = 0; n5 < coresize; n5++) {
 									for (int n6 = 0; n6 < coresize; n6++) {
-										deleteList.push_back(Point(j + n5, i + n6));
+										deleteList.push_back(Point(i+n6, j + n5));
 									}
 								}
 							}
@@ -697,7 +705,10 @@ int main(int argc, char* argv[])
 	//
 	Mat line;
 	line = dilateion.clone();   //克隆二值化图像
-	thinImage_6(line,2);
+	thinImage_6(line,8);
+	thinImage_6(line, 4);
+	thinImage_6(line, 2);
+	thinImage_6(line, 1);
 	
 	Mat line_2;
 	dilateion.copyTo(line_2);
