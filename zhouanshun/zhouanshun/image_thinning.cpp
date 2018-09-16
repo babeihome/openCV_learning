@@ -467,8 +467,16 @@ void thinImage_6(Mat &srcImg, int coresize) {
 	bool inOddIterations = true;
 	int loop_num = 0;
 	int threshold = 255;
+	int offset = 0;
 	while (true) {
-		int offset = (int)inOddIterations *0;
+		if (offset < coresize) {
+			offset++;
+		}
+		else {
+			offset = 0;
+		}
+		offset = 0;
+
 		loop_num++;
 		for (int j = (upsize + offset) ; j < (nl - downsize - 1); j = j + coresize)
 		{
