@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 	// experiment describe here
 	// 
 	queue<string> exp1;
-	exp1.push("30"); // first is pre-process
+	exp1.push("0"); // first is pre-process
 	exp1.push("0");  // then binarization
 	exp1.push("0"); // then after-process
 	exp1.push("0"); //thining

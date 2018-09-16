@@ -75,7 +75,8 @@ void thinImage(Mat & srcImg) {
 
 		inOddIterations = !inOddIterations;
 		imshow("test1", srcImg);
-		waitKey(1000);
+		imwrite("./results/baseline/" + to_string(loop_num) + ".png", srcImg);
+		waitKey(200);
 	}
 }
 
@@ -449,6 +450,7 @@ void thinImage_5(Mat & srcImg) {
 
 		inOddIterations = !inOddIterations;
 		imshow("test2", srcImg);
+		imwrite("./results/improved/"+to_string(loop_num)+".png", srcImg);
 		waitKey(200);
 	}
 }
