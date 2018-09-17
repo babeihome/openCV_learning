@@ -688,7 +688,7 @@ int main(int argc, char* argv[])
 {
 	// image path from command argv
 	//Mat img = imread(argv[1], -1);
-	String imagePath("../../shared_data/stm32/ÇúÏß.jpg");
+	String imagePath("../../shared_data/stm32/path1.jpg");
 	Mat img = imread(imagePath, -1);
 	if (img.empty())
 	{
