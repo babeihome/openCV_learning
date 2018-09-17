@@ -64,6 +64,16 @@ void thinning(Mat &origin_img, Mat &dst_img, int method_code) {
 	case 1:
 		dst_img = origin_img.clone();
 		chao_thinimage(dst_img, 2);
+		break;
+	case 2:
+		dst_img = origin_img.clone();
+		thinImage_alt(dst_img, 8, 10);
+		thinImage_alt(dst_img, 4, 10);
+		thinImage_alt(dst_img, 2, 10);
+		thinImage_alt(dst_img, 1, 200);
+		imshow("test",dst_img);
+		//waitKey(200);
+		break;
 	default: cout << "no this method, sorry" << endl;
 		break;
 	}
@@ -557,4 +567,130 @@ void chao_thinimage(Mat &srcimage, int coreSize)//单通道、二值化后的图像
 		}
 	}
 	
+}
+
+void thinImage_alt(Mat &srcImg, int coresize, int loop_times) {
+	vector<Point> deleteList;
+	uchar *groupdata[100];
+	int neighbourhood[9];
+	int distinguish[9];
+	int nl = srcImg.rows;
+	int nc = srcImg.cols;
+	int upsize = coresize;
+	int downsize = 2 * coresize - 1;
+	bool inOddIterations = true;
+	int loop_num = 0;
+	int threshold = 255;
+	int offset = 0;
+	while (true) {
+		if (offset < coresize) {
+			offset++;
+		}
+		else {
+			offset = 0;
+		}
+		offset = 0;
+
+		loop_num++;
+		for (int j = (upsize + offset); j < (nl - downsize - 1); j = j + coresize)
+		{
+			// get the data array, n1 is the offset of rows
+			for (int n1 = -coresize; n1 < 2 * coresize; n1++) {
+				groupdata[coresize + n1] = srcImg.ptr<uchar>(j + n1);
+			}
+			/*
+			for (int n1 = 1; n1 <= upsize; n1++) {
+				groupdata[upsize - n1] = srcImg.ptr<uchar>(j - n1);
+			}
+			groupdata[upsize] = srcImg.ptr<uchar>(j);
+			for (int n1 = 1; n1 <= downsize; n1++) {
+				groupdata[upsize + n1] = srcImg.ptr<uchar>(j + n1);
+			}
+			*/
+			for (int i = upsize + offset; i < (nc - downsize); i = i + coresize) {
+				for (int n4 = 0; n4 <= 8; n4++)
+					distinguish[n4] = 0;  //initialize the distinguish				
+				for (int n2 = 0; n2 < coresize; n2++) {	//n2 is offset of rows
+					for (int n3 = 0; n3 < coresize; n3++) {	//n3 is offset of columns
+						distinguish[0] += groupdata[coresize + n2][i + n3];
+						distinguish[1] += groupdata[n2][i + n3];
+						distinguish[2] += groupdata[n2][i + coresize + n3];
+						distinguish[3] += groupdata[coresize + n2][i + coresize + n3];
+						distinguish[4] += groupdata[2 * coresize + n2][i + coresize + n3];
+						distinguish[5] += groupdata[2 * coresize + n2][i + n3];
+						distinguish[6] += groupdata[2 * coresize + n2][i - coresize + n3];
+						distinguish[7] += groupdata[coresize + n2][i - coresize + n3];
+						distinguish[8] += groupdata[n2][i - coresize + n3];
+					}
+				}
+
+				if (distinguish[0] >= threshold) {
+					int whitePointCount = 0;
+					neighbourhood[0] = 1;
+					if (distinguish[1] >= threshold) neighbourhood[1] = 1;
+					else  neighbourhood[1] = 0;
+					if (distinguish[2] >= threshold) neighbourhood[2] = 1;
+					else  neighbourhood[2] = 0;
+					if (distinguish[3] >= threshold) neighbourhood[3] = 1;
+					else  neighbourhood[3] = 0;
+					if (distinguish[4] >= threshold) neighbourhood[4] = 1;
+					else  neighbourhood[4] = 0;
+					if (distinguish[5] >= threshold) neighbourhood[5] = 1;
+					else  neighbourhood[5] = 0;
+					if (distinguish[6] >= threshold) neighbourhood[6] = 1;
+					else  neighbourhood[6] = 0;
+					if (distinguish[7] >= threshold) neighbourhood[7] = 1;
+					else  neighbourhood[7] = 0;
+					if (distinguish[8] >= threshold) neighbourhood[8] = 1;
+					else  neighbourhood[8] = 0;
+					for (int k = 1; k < 9; k++) {
+						whitePointCount += neighbourhood[k];
+					}
+					if ((whitePointCount >= 2) && (whitePointCount <= 6)) {
+						int ap = 0;
+						if ((neighbourhood[1] == 0) && (neighbourhood[2] == 1)) ap++;
+						if ((neighbourhood[2] == 0) && (neighbourhood[3] == 1)) ap++;
+						if ((neighbourhood[3] == 0) && (neighbourhood[4] == 1)) ap++;
+						if ((neighbourhood[4] == 0) && (neighbourhood[5] == 1)) ap++;
+						if ((neighbourhood[5] == 0) && (neighbourhood[6] == 1)) ap++;
+						if ((neighbourhood[6] == 0) && (neighbourhood[7] == 1)) ap++;
+						if ((neighbourhood[7] == 0) && (neighbourhood[8] == 1)) ap++;
+						if ((neighbourhood[8] == 0) && (neighbourhood[1] == 1)) ap++;
+						if (ap == 1) {
+							if (inOddIterations && (neighbourhood[3] * neighbourhood[5] * neighbourhood[7] == 0)
+								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[5] == 0)) {
+								for (int n5 = 0; n5 < coresize; n5++) {
+									for (int n6 = 0; n6 < coresize; n6++) {
+										deleteList.push_back(Point(i + n6, j + n5));
+									}
+								}
+							}
+							else if (!inOddIterations && (neighbourhood[1] * neighbourhood[5] * neighbourhood[7] == 0)
+								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[7] == 0)) {
+								for (int n5 = 0; n5 < coresize; n5++) {
+									for (int n6 = 0; n6 < coresize; n6++) {
+										deleteList.push_back(Point(i + n6, j + n5));
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		if (deleteList.size() == 0 | loop_num > loop_times)
+			break;
+		for (size_t i = 0; i < deleteList.size(); i++) {
+			Point tem;
+			tem = deleteList[i];
+			uchar* data = srcImg.ptr<uchar>(tem.y);
+			data[tem.x] = 0;
+		}
+		deleteList.clear();
+
+		inOddIterations = !inOddIterations;
+		//imshow("test3", srcImg);
+		//waitKey(200);
+	}
+	//imshow("test", srcImg);
 }

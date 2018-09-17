@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
 	exp1.push("0"); // first is pre-process
 	exp1.push("0");  // then binarization
 	exp1.push("0"); // then after-process
-	exp1.push("0"); //thining
+	exp1.push("2"); //thining
 	exp1.push("0"); //anaylse
 	experiment_sequence.push(exp1);	//
 	// experiment describe end

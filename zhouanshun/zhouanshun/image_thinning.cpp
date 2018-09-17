@@ -455,7 +455,7 @@ void thinImage_5(Mat & srcImg) {
 		waitKey(200);
 	}
 }
-void thinImage_6(Mat &srcImg, int coresize) {
+void thinImage_6(Mat &srcImg, int coresize,int loop_times) {
 	vector<Point> deleteList;
 	uchar *groupdata[100];
 	int neighbourhood[9];
@@ -555,7 +555,7 @@ void thinImage_6(Mat &srcImg, int coresize) {
 								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[7] == 0)) {
 								for (int n5 = 0; n5 < coresize; n5++) {
 									for (int n6 = 0; n6 < coresize; n6++) {
-										deleteList.push_back(Point(i+n6, j + n5));
+										deleteList.push_back(Point(i + n6, j + n5));
 									}
 								}
 							}
@@ -564,7 +564,7 @@ void thinImage_6(Mat &srcImg, int coresize) {
 				}				
 			}			
 		}
-		if (deleteList.size() == 0 | loop_num > 200)
+		if (deleteList.size() == 0 | loop_num > loop_times)
 			break;
 		for (size_t i = 0; i < deleteList.size(); i++) {
 			Point tem;
@@ -713,10 +713,10 @@ int main(int argc, char* argv[])
 	//
 	Mat line;
 	line = dilateion.clone();   //克隆二值化图像
-	thinImage_6(line,8);
-	thinImage_6(line, 4);
-	thinImage_6(line, 2);
-	thinImage_6(line, 1);
+	thinImage_6(line,8,200);
+	thinImage_6(line, 4,200);
+	thinImage_6(line, 2,200);
+	thinImage_6(line, 1,200);
 	
 	Mat line_2;
 	dilateion.copyTo(line_2);
