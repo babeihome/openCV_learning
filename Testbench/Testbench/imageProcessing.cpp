@@ -67,11 +67,11 @@ void thinning(Mat &origin_img, Mat &dst_img, int method_code) {
 		break;
 	case 2:
 		dst_img = origin_img.clone();
-		thinImage_alt(dst_img, 8, 10);
-		thinImage_alt(dst_img, 4, 10);
-		thinImage_alt(dst_img, 2, 10);
-		thinImage_alt(dst_img, 1, 200);
-		imshow("test",dst_img);
+		thinImage_alt(dst_img, 8, 100);
+		//thinImage_alt(dst_img, 4, 5);
+		thinImage_alt(dst_img, 2, 100);
+		//thinImage_alt(dst_img, 1, 200);
+		//imshow("test",dst_img);
 		//waitKey(200);
 		break;
 	default: cout << "no this method, sorry" << endl;
@@ -565,6 +565,7 @@ void chao_thinimage(Mat &srcimage, int coreSize)//单通道、二值化后的图像
 			imwrite("./results/improved/" + to_string(loop_num) + ".png", srcimage);
 			waitKey(200);
 		}
+
 	}
 	
 }
@@ -583,13 +584,13 @@ void thinImage_alt(Mat &srcImg, int coresize, int loop_times) {
 	int threshold = 255;
 	int offset = 0;
 	while (true) {
-		if (offset < coresize) {
+		/*if (offset < coresize) {
 			offset++;
 		}
 		else {
 			offset = 0;
-		}
-		offset = 0;
+		}*/
+		//offset = 0;
 
 		loop_num++;
 		for (int j = (upsize + offset); j < (nl - downsize - 1); j = j + coresize)
@@ -689,6 +690,7 @@ void thinImage_alt(Mat &srcImg, int coresize, int loop_times) {
 		deleteList.clear();
 
 		inOddIterations = !inOddIterations;
+		offset = !offset;
 		//imshow("test3", srcImg);
 		//waitKey(200);
 	}
