@@ -24,14 +24,20 @@ int main(int argc, char* argv[])
 	exp1.push("0"); // first is pre-process
 	exp1.push("0");  // then binarization
 	exp1.push("0"); // then after-process
-	exp1.push("2"); //thining
+	exp1.push("0"); //thining
 	exp1.push("0"); //anaylse
 	experiment_sequence.push(exp1);	//
 	// experiment describe end
 
 	Mat img, pre_img, bi_img, aft_img, thin_img, tmp_img;
 
-
+	double t_time, t_pre, t_bi, t_aft, t_thin, t_analyse;
+	t_time = 0;
+	t_pre = 0;
+	t_bi = 0;
+	t_aft = 0;
+	t_thin = 0;
+	t_analyse = 0;
 
 	for (int exp_id = 0; exp_id < experiment_sequence.size(); exp_id++) {	
 		
@@ -77,6 +83,7 @@ int main(int argc, char* argv[])
 				tmp_img = pre_img;
 			}
 			sub_stop = clock();
+			t_pre += (sub_stop - sub_start);
 			std::cout << "pre-processing done:" << (sub_stop - sub_start)/CLK_TCK << "s" << std::endl;
 
 			//debug part: show the image
@@ -99,16 +106,16 @@ int main(int argc, char* argv[])
 				binarize(tmp_img, bi_img, tmp_op);
 				tmp_img = bi_img;
 			}
-			std::cout << "binarization done" << std::endl;
+			sub_stop = clock();
+			t_bi += (sub_stop - sub_start);
+			std::cout << "binarization done:" << (sub_stop - sub_start) / CLK_TCK << "s" << std::endl;
 			//debug part: show the image
 			if (debug) {
 				namedWindow("black", 0);
 				resizeWindow("black", 640, 480);
 				moveWindow("black", 0, 480);
 				imshow("black", bi_img);
-				//waitKey(1);
-				sub_stop = clock();
-				std::cout << "pre-processing done:" << (sub_stop - sub_start) / CLK_TCK << "s" << std::endl;
+				//waitKey(1);			
 			}
 
 
@@ -116,12 +123,15 @@ int main(int argc, char* argv[])
 			string aft_process = exp_tmp.front();
 			exp_tmp.pop();
 			tmp_img = bi_img;
+			sub_start = clock();
 			for (int op_id = 0; op_id < aft_process.length(); op_id++) {
 				tmp_op = aft_process[op_id] - 48;   // ASCII code of '0' is 48
 				afterProcess(tmp_img, aft_img, tmp_op);
 				tmp_img = aft_img;
 			}
-			std::cout << "after-processing done" << std::endl;
+			sub_stop = clock();
+			t_aft += (sub_stop - sub_start);
+			std::cout << "after-processing done:" << (sub_stop - sub_start) / CLK_TCK << "s" << std::endl;
 			//debug part: show the image
 			if (debug) {
 				//imshow("after", aft_img);
@@ -132,12 +142,15 @@ int main(int argc, char* argv[])
 			string thin_process = exp_tmp.front();
 			exp_tmp.pop();
 			tmp_img = aft_img;
+			sub_start = clock();
 			for (int op_id = 0; op_id < thin_process.length(); op_id++) {
 				tmp_op = thin_process[op_id] - 48;   // ASCII code of '0' is 48
 				thinning(tmp_img, thin_img, tmp_op);
 				tmp_img = thin_img;
 			}
-			std::cout << "thinning processing done" << std::endl;
+			sub_stop = clock();
+			t_thin += (sub_stop - sub_start);
+			std::cout << "thinning processing done" << (sub_stop - sub_start) / CLK_TCK << "s" << std::endl;
 			//debug part: show the image
 			if (debug) {
 				namedWindow("thin", 0);
@@ -151,11 +164,16 @@ int main(int argc, char* argv[])
 			string analyse_process = exp_tmp.front();
 			vector<pair<float, float>> param_list;
 			exp_tmp.pop();
+			sub_start = clock();
 			for (int op_id = 0; op_id < analyse_process.length(); op_id++) {
 				tmp_op = analyse_process[op_id] - 48;   // ASCII code of '0' is 48
 				analysis(thin_img, param_list, tmp_op);
 			}
-			std::cout << "analysis done" << std::endl;
+			sub_stop = clock();
+			t_analyse += (sub_stop - sub_start);
+			std::cout << "analysis done" << (sub_stop - sub_start) / CLK_TCK << "s" << std::endl;
+			std:cout << "pre totle " << t_pre << "\t bi totle " << t_bi << "\t after totle " << t_aft << "\t thinning totle " << t_thin << "\t analyse totle " << t_analyse << std::endl;
+
 		}
 		experiment_sequence.pop();
 		stop = time(NULL);

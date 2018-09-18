@@ -67,11 +67,11 @@ void thinning(Mat &origin_img, Mat &dst_img, int method_code) {
 		break;
 	case 2:
 		dst_img = origin_img.clone();
-		thinImage_alt(dst_img, 8, 10);
-		thinImage_alt(dst_img, 4, 10);
-		thinImage_alt(dst_img, 2, 10);
-		thinImage_alt(dst_img, 1, 200);
-		imshow("test",dst_img);
+		//thinImage_alt(dst_img, 8, 1);
+		//thinImage_alt(dst_img, 4, 1);
+		thinImage_alt(dst_img, 2, 100);
+		//thinImage_alt(dst_img, 1, 1);
+		//imshow("test",dst_img);
 		//waitKey(200);
 		break;
 	default: cout << "no this method, sorry" << endl;
@@ -550,7 +550,7 @@ void chao_thinimage(Mat &srcimage, int coreSize)//单通道、二值化后的图像
 					}
 				}
 			}
-			if (deleteList.size() == 0 | loop_num >200)
+			if (deleteList.size() == 0)
 				break;
 			for (size_t i = 0; i < deleteList.size(); i++) {
 				Point tem;
@@ -561,9 +561,9 @@ void chao_thinimage(Mat &srcimage, int coreSize)//单通道、二值化后的图像
 			deleteList.clear();
 
 			inOddIterations = !inOddIterations;
-			imshow("test2", srcimage);
-			imwrite("./results/improved/" + to_string(loop_num) + ".png", srcimage);
-			waitKey(200);
+			//imshow("test2", srcimage);
+			//imwrite("./results/improved/" + to_string(loop_num) + ".png", srcimage);
+			//waitKey(200);
 		}
 	}
 	
