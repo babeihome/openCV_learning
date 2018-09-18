@@ -1,6 +1,6 @@
 
 #include <iostream>  
-
+#include <vector>
 #include "opencv2/opencv.hpp"
 
 
@@ -28,11 +28,11 @@ int main()
 	morphologyEx(dst_processed, dst_ok, MORPH_CLOSE, element);   //闭运算
 	chao_thinimage(dst_ok);
 
-	cvtColor(dst_ok, dst_Image, COLOR_GRAY2BGR);
+	cvtColor(src_gray, dst_Image, COLOR_GRAY2BGR);
 
 
 	//进行霍夫变换
-	vector<Vec2f> lines;            //定义一个矢量结构用于存放得到的线段矢量集合
+	/*vector<Vec2f> lines;            //定义一个矢量结构用于存放得到的线段矢量集合
 	HoughLines(dst_ok, lines, 1, CV_PI / 180, 230, 0, 0);
 
 	//在图中绘出线段
@@ -48,18 +48,18 @@ int main()
 		pt2.x = cvRound(x0 - 1000 * (-b));
 		pt2.y = cvRound(y0 - 1000 * (a));
 		line(dst_Image, pt1, pt2, Scalar(0, 0, 255), 1, LINE_AA);
-	}
+	}*/
 
 
 
 	//进行霍夫变换
-	//vector<Vec4i> lines;
-	//HoughLinesP(dst_ok, lines, 1, CV_PI / 180, 200, 30, );
-	//for (size_t i = 0; i < lines.size(); i++)
-	//{
-		//line(dst_Image, Point(lines[i][0], lines[i][1]), Point(lines[i][2], lines[i][3]),
-			//Scalar(0, 0, 255), 1, 8);
-	//}
+	vector<Vec4i> lines;
+	HoughLinesP(dst_ok, lines, 1, CV_PI / 180, 10, 3, 10);
+	for (size_t i = 0; i < lines.size(); i++)
+	{
+		 line(dst_Image, Point(lines[i][0], lines[i][1]), Point(lines[i][2], lines[i][3]),
+	     Scalar(0, 0, 0), 1, 8);
+	}
 
 
 // show original image

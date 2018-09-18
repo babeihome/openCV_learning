@@ -1,5 +1,6 @@
 
 #include "imageProcessing.h"
+#include "math.h"
 
 using namespace std;
 using namespace cv;
@@ -67,10 +68,10 @@ void thinning(Mat &origin_img, Mat &dst_img, int method_code) {
 		break;
 	case 2:
 		dst_img = origin_img.clone();
-		//thinImage_alt(dst_img, 8, 1);
-		//thinImage_alt(dst_img, 4, 1);
+		thinImage_alt(dst_img, 8, 100);
+		//thinImage_alt(dst_img, 4, 5);
 		thinImage_alt(dst_img, 2, 100);
-		//thinImage_alt(dst_img, 1, 1);
+		//thinImage_alt(dst_img, 1, 200);
 		//imshow("test",dst_img);
 		//waitKey(200);
 		break;
@@ -565,6 +566,7 @@ void chao_thinimage(Mat &srcimage, int coreSize)//单通道、二值化后的图像
 			//imwrite("./results/improved/" + to_string(loop_num) + ".png", srcimage);
 			//waitKey(200);
 		}
+
 	}
 	
 }
@@ -583,13 +585,13 @@ void thinImage_alt(Mat &srcImg, int coresize, int loop_times) {
 	int threshold = 255;
 	int offset = 0;
 	while (true) {
-		if (offset < coresize) {
+		/*if (offset < coresize) {
 			offset++;
 		}
 		else {
 			offset = 0;
-		}
-		offset = 0;
+		}*/
+		//offset = 0;
 
 		loop_num++;
 		for (int j = (upsize + offset); j < (nl - downsize - 1); j = j + coresize)
@@ -689,8 +691,130 @@ void thinImage_alt(Mat &srcImg, int coresize, int loop_times) {
 		deleteList.clear();
 
 		inOddIterations = !inOddIterations;
+		offset = !offset;
 		//imshow("test3", srcImg);
 		//waitKey(200);
 	}
+
+}
+
+
 	//imshow("test", srcImg);
+
+void thinImage_alt_2(Mat &srcImg, int coresize, int loop_times) {
+	vector<Point> deleteList;
+	uchar *groupdata[100];
+	int neighbourhood[9];
+	int distinguish[9];
+	int nl = srcImg.rows;
+	int nc = srcImg.cols;
+	int upsize = coresize;
+	int downsize = 2 * coresize - 1;
+	bool inOddIterations = true;
+	int loop_num = 0;
+	int threshold = 255;
+	int offset = 0;
+	Mat M(nc / coresize, nl / coresize,CV_8UC1);
+	while (true) {
+		loop_num++;
+		for (int j = (upsize + offset); j < (nl - downsize - 1); j = j + 3 * coresize)
+		{
+			// get the data array, n1 is the offset of rows
+			for (int n1 = -coresize; n1 < 2 * coresize; n1++) {
+				groupdata[coresize + n1] = srcImg.ptr<uchar>(j + n1);
+			}			
+			for (int i = upsize; i < (nc - downsize); i = i + 3 * coresize) {
+				for (int n4 = 0; n4 <= 8; n4++)
+					distinguish[n4] = 0;  //initialize the distinguish				
+				for (int n2 = 0; n2 < coresize; n2++) {	//n2 is offset of rows
+					for (int n3 = 0; n3 < coresize; n3++) {	//n3 is offset of columns
+						distinguish[0] += groupdata[coresize + n2][i + n3];
+						distinguish[1] += groupdata[n2][i + n3];
+						distinguish[2] += groupdata[n2][i + coresize + n3];
+						distinguish[3] += groupdata[coresize + n2][i + coresize + n3];
+						distinguish[4] += groupdata[2 * coresize + n2][i + coresize + n3];
+						distinguish[5] += groupdata[2 * coresize + n2][i + n3];
+						distinguish[6] += groupdata[2 * coresize + n2][i - coresize + n3];
+						distinguish[7] += groupdata[coresize + n2][i - coresize + n3];
+						distinguish[8] += groupdata[n2][i - coresize + n3];
+					}
+				
+				}	
+				if (distinguish[0] >= threshold) M.at<uchar>(i/coresize, j/coresize) = 255;
+				else  M.at<uchar>(i/coresize, j/coresize) = 0;
+				if (distinguish[1] >= threshold) M.at<uchar>(i/coresize - 1, j/coresize) = 255;
+				else  M.at<uchar>(i/coresize - coresize, j/coresize) = 0;
+				if (distinguish[2] >= threshold) M.at<uchar>(i/coresize - 1, j/coresize + 1) = 255;
+				else M.at<uchar>(i/coresize - coresize, j/coresize + coresize) = 0;
+				if (distinguish[3] >= threshold) M.at<uchar>(i/coresize, j/coresize + 1) = 255;
+				else  M.at<uchar>(i/coresize, j/coresize + coresize) = 0;
+				if (distinguish[4] >= threshold) M.at<uchar>(i/coresize + 1, j/coresize + 1) = 255;
+				else  M.at<uchar>(i/coresize + coresize, j/coresize + coresize) = 0;
+				if (distinguish[5] >= threshold) M.at<uchar>(i/coresize + 1, j/coresize) = 255;
+				else  M.at<uchar>(i/coresize + coresize, j/coresize) = 0;
+				if (distinguish[6] >= threshold) M.at<uchar>(i/coresize + 1, j/coresize - 1) = 255;
+				else  M.at<uchar>(i/coresize + coresize, j/coresize - coresize) = 0;
+				if (distinguish[7] >= threshold) M.at<uchar>(i/coresize, j/coresize - 1) = 255;
+				else  M.at<uchar>(i/coresize, j/coresize - coresize) = 0;
+				if (distinguish[8] >= threshold) M.at<uchar>(i/coresize - 1, j/coresize - 1) = 255;
+				else  M.at<uchar>(i/coresize - 1, j/coresize - 1) = 0;
+			}
+		}
+		imshow("small", M);
+		waitKey(200);
+		if (deleteList.size() == 0 | loop_num > loop_times)
+			break;
+		for (size_t i = 0; i < deleteList.size(); i++) {
+			Point tem;
+			tem = deleteList[i];
+			uchar* data = srcImg.ptr<uchar>(tem.y);
+			data[tem.x] = 0;
+		}
+		deleteList.clear();
+
+		inOddIterations = !inOddIterations;
+		offset = !offset;
+		//imshow("test3", srcImg);
+		//waitKey(200);
+	}
+
+}
+
+int least_square_method(Mat &src, float *theta, float *b)
+{
+	int i, j, N = 0, start = 2;
+	int count_x[400], count_y[400];
+	int nl = src.rows;
+	int nc = src.cols;
+	float temp, k;
+
+	for (i = start; i < (nl - start); i++) {//i 是行，纵坐标
+		uchar *data = src.ptr<uchar>(i);
+		for (j = start; j < (nc - start); j++) {//j是列，横坐标
+			if (data[j] == 255) {
+				count_x[N] = j; count_y[N] = i;
+				N++;
+			}
+		}
+	}
+
+	float E_X = 0.0;
+	float E_XX = 0.0;
+	float E_Y = 0.0;
+	float E_XY = 0.0;
+
+	for (i = 0; i <= N; i++) {
+		E_X += count_x[i];
+		E_XX += count_x[i] * count_x[i];
+		E_Y += count_y[i];
+		E_XY += count_x[i] * count_y[i];
+	}
+
+	if (temp = (N*E_XX - E_X * E_X) != 0) {
+		k = (N*E_XY - E_X * E_Y) / temp;
+		*b = (E_XX*E_Y - E_X * E_XY) / temp;
+		*theta = atanf(k);
+		return 1;
+	}
+	else return 0;
 }
