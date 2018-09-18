@@ -695,13 +695,90 @@ void thinImage_alt(Mat &srcImg, int coresize, int loop_times) {
 		//imshow("test3", srcImg);
 		//waitKey(200);
 	}
-<<<<<<< HEAD
+
 }
 
-=======
+
 	//imshow("test", srcImg);
+
+void thinImage_alt_2(Mat &srcImg, int coresize, int loop_times) {
+	vector<Point> deleteList;
+	uchar *groupdata[100];
+	int neighbourhood[9];
+	int distinguish[9];
+	int nl = srcImg.rows;
+	int nc = srcImg.cols;
+	int upsize = coresize;
+	int downsize = 2 * coresize - 1;
+	bool inOddIterations = true;
+	int loop_num = 0;
+	int threshold = 255;
+	int offset = 0;
+	Mat M(nc / coresize, nl / coresize,CV_8UC1);
+	while (true) {
+		loop_num++;
+		for (int j = (upsize + offset); j < (nl - downsize - 1); j = j + 3 * coresize)
+		{
+			// get the data array, n1 is the offset of rows
+			for (int n1 = -coresize; n1 < 2 * coresize; n1++) {
+				groupdata[coresize + n1] = srcImg.ptr<uchar>(j + n1);
+			}			
+			for (int i = upsize; i < (nc - downsize); i = i + 3 * coresize) {
+				for (int n4 = 0; n4 <= 8; n4++)
+					distinguish[n4] = 0;  //initialize the distinguish				
+				for (int n2 = 0; n2 < coresize; n2++) {	//n2 is offset of rows
+					for (int n3 = 0; n3 < coresize; n3++) {	//n3 is offset of columns
+						distinguish[0] += groupdata[coresize + n2][i + n3];
+						distinguish[1] += groupdata[n2][i + n3];
+						distinguish[2] += groupdata[n2][i + coresize + n3];
+						distinguish[3] += groupdata[coresize + n2][i + coresize + n3];
+						distinguish[4] += groupdata[2 * coresize + n2][i + coresize + n3];
+						distinguish[5] += groupdata[2 * coresize + n2][i + n3];
+						distinguish[6] += groupdata[2 * coresize + n2][i - coresize + n3];
+						distinguish[7] += groupdata[coresize + n2][i - coresize + n3];
+						distinguish[8] += groupdata[n2][i - coresize + n3];
+					}
+				
+				}	
+				if (distinguish[0] >= threshold) M.at<uchar>(i/coresize, j/coresize) = 255;
+				else  M.at<uchar>(i/coresize, j/coresize) = 0;
+				if (distinguish[1] >= threshold) M.at<uchar>(i/coresize - 1, j/coresize) = 255;
+				else  M.at<uchar>(i/coresize - coresize, j/coresize) = 0;
+				if (distinguish[2] >= threshold) M.at<uchar>(i/coresize - 1, j/coresize + 1) = 255;
+				else M.at<uchar>(i/coresize - coresize, j/coresize + coresize) = 0;
+				if (distinguish[3] >= threshold) M.at<uchar>(i/coresize, j/coresize + 1) = 255;
+				else  M.at<uchar>(i/coresize, j/coresize + coresize) = 0;
+				if (distinguish[4] >= threshold) M.at<uchar>(i/coresize + 1, j/coresize + 1) = 255;
+				else  M.at<uchar>(i/coresize + coresize, j/coresize + coresize) = 0;
+				if (distinguish[5] >= threshold) M.at<uchar>(i/coresize + 1, j/coresize) = 255;
+				else  M.at<uchar>(i/coresize + coresize, j/coresize) = 0;
+				if (distinguish[6] >= threshold) M.at<uchar>(i/coresize + 1, j/coresize - 1) = 255;
+				else  M.at<uchar>(i/coresize + coresize, j/coresize - coresize) = 0;
+				if (distinguish[7] >= threshold) M.at<uchar>(i/coresize, j/coresize - 1) = 255;
+				else  M.at<uchar>(i/coresize, j/coresize - coresize) = 0;
+				if (distinguish[8] >= threshold) M.at<uchar>(i/coresize - 1, j/coresize - 1) = 255;
+				else  M.at<uchar>(i/coresize - 1, j/coresize - 1) = 0;
+			}
+		}
+		imshow("small", M);
+		waitKey(200);
+		if (deleteList.size() == 0 | loop_num > loop_times)
+			break;
+		for (size_t i = 0; i < deleteList.size(); i++) {
+			Point tem;
+			tem = deleteList[i];
+			uchar* data = srcImg.ptr<uchar>(tem.y);
+			data[tem.x] = 0;
+		}
+		deleteList.clear();
+
+		inOddIterations = !inOddIterations;
+		offset = !offset;
+		//imshow("test3", srcImg);
+		//waitKey(200);
+	}
+
 }
->>>>>>> d90bded9f88f339af533e46f647b5c46ab3476b9
 
 int least_square_method(Mat &src, float *theta, float *b)
 {
