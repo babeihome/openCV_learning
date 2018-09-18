@@ -11,5 +11,6 @@ void thinning(Mat &origin_img, Mat &dst_img, int method_code);
 int analysis(Mat &origin_img, vector < pair < float, float >> &kb, int method_code);
 
 void MedianFlitering(Mat &src, Mat &dst);
-void chao_thinimage(Mat &srcimage);//单通道、二值化后的图像;
+void chao_thinimage(Mat &srcimage, int coreSize);//单通道、二值化后的图像;
+void thinImage_alt(Mat &srcImg, int coresize, int loop_times);//可变核大小zhangsuen细化
 
