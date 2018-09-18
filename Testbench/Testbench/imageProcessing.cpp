@@ -1,5 +1,6 @@
 
 #include "imageProcessing.h"
+#include "math.h"
 
 using namespace std;
 using namespace cv;
@@ -386,4 +387,46 @@ void chao_thinimage(Mat &srcimage)//单通道、二值化后的图像
 		deletelist1.clear();
 
 	}
+}
+
+int least_square_method(Mat &src, float *theta, float *b )
+{
+	int i, j,N=0,start=2;
+	int count_x[400],count_y[400];
+	int nl = src.rows;
+	int nc = src.cols;
+	float temp,k;
+
+	for (i = start; i < (nl - start); i++) {//i 是行，纵坐标
+		uchar *data = src.ptr<uchar>(i);
+		for (j = start; j < (nc - start); j++) {//j是列，横坐标
+			if (data[j] == 255) {
+				count_x[N] = j; count_y[N]=i;
+				N++;
+			}
+		}
+	}
+
+	float E_X = 0.0;
+	float E_XX = 0.0;
+	float E_Y = 0.0;
+	float E_XY = 0.0;
+
+	for (i = 0; i <= N; i++) {
+		E_X += count_x[i];
+		E_XX += count_x[i]* count_x[i];
+		E_Y += count_y[i];
+		E_XY += count_x[i] * count_y[i];
+	}
+
+	if (temp=(N*E_XX - E_X * E_X) != 0) {
+		k = (N*E_XY - E_X * E_Y) / temp;
+		*b = (E_XX*E_Y - E_X * E_XY) / temp;
+		*theta = atanf(k);
+		return 1;
+	}
+
+	else return 0;
+
+	cout << "y=" << k << "x+" << b << endl;
 }
