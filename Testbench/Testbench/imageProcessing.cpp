@@ -68,12 +68,20 @@ void thinning(Mat &origin_img, Mat &dst_img, int method_code) {
 		break;
 	case 2:
 		dst_img = origin_img.clone();
-		thinImage_alt(dst_img, 8, 100);
+		//thinImage_alt(dst_img, 8, 100);
 		//thinImage_alt(dst_img, 4, 5);
 		thinImage_alt(dst_img, 2, 100);
 		//thinImage_alt(dst_img, 1, 200);
 		//imshow("test",dst_img);
 		//waitKey(200);
+		break;
+	case 3:
+		dst_img = origin_img.clone();
+		thinImage_alt_2(dst_img, 2, 100);
+		break;
+	case 4:
+		dst_img = origin_img.clone();
+		thinImage_resize(dst_img, 8);
 		break;
 	default: cout << "no this method, sorry" << endl;
 		break;
@@ -584,6 +592,12 @@ void thinImage_alt(Mat &srcImg, int coresize, int loop_times) {
 	int loop_num = 0;
 	int threshold = 255;
 	int offset = 0;
+	double start, stop,duration,duration1,duration2;
+	start = 0;
+	stop = 0;
+	duration1 = 0;
+	duration2 = 0;
+	duration = 0;
 	while (true) {
 		/*if (offset < coresize) {
 			offset++;
@@ -596,10 +610,13 @@ void thinImage_alt(Mat &srcImg, int coresize, int loop_times) {
 		loop_num++;
 		for (int j = (upsize + offset); j < (nl - downsize - 1); j = j + coresize)
 		{
+			start = clock();
 			// get the data array, n1 is the offset of rows
 			for (int n1 = -coresize; n1 < 2 * coresize; n1++) {
 				groupdata[coresize + n1] = srcImg.ptr<uchar>(j + n1);
 			}
+			stop = clock();
+			duration += stop - start;
 			/*
 			for (int n1 = 1; n1 <= upsize; n1++) {
 				groupdata[upsize - n1] = srcImg.ptr<uchar>(j - n1);
@@ -610,6 +627,7 @@ void thinImage_alt(Mat &srcImg, int coresize, int loop_times) {
 			}
 			*/
 			for (int i = upsize + offset; i < (nc - downsize); i = i + coresize) {
+				start = clock();
 				for (int n4 = 0; n4 <= 8; n4++)
 					distinguish[n4] = 0;  //initialize the distinguish				
 				for (int n2 = 0; n2 < coresize; n2++) {	//n2 is offset of rows
@@ -625,7 +643,10 @@ void thinImage_alt(Mat &srcImg, int coresize, int loop_times) {
 						distinguish[8] += groupdata[n2][i - coresize + n3];
 					}
 				}
+				stop = clock();
+				duration1 += (stop - start);
 
+				start = clock();
 				if (distinguish[0] >= threshold) {
 					int whitePointCount = 0;
 					neighbourhood[0] = 1;
@@ -678,8 +699,14 @@ void thinImage_alt(Mat &srcImg, int coresize, int loop_times) {
 						}
 					}
 				}
+				stop = clock();
+				duration2 += (stop - start);
 			}
 		}
+		std::cout << "sum c*c core into 1 pixel done:" << duration1 / CLK_TCK << "s" << std::endl;
+		std::cout << "logic judge,get delete list:" << duration2 / CLK_TCK << "s" << std::endl;
+		std::cout << "get groupdata done:" << duration / CLK_TCK << "s" << std::endl;
+
 		if (deleteList.size() == 0 | loop_num > loop_times)
 			break;
 		for (size_t i = 0; i < deleteList.size(); i++) {
@@ -778,6 +805,48 @@ void thinImage_alt_2(Mat &srcImg, int coresize, int loop_times) {
 		//waitKey(200);
 	}
 
+}
+
+void thinImage_resize(Mat &src, int coresize) {
+	vector<Point> deleteList;
+	uchar *S_line;
+	uchar *M_line;
+	int neighbourhood[9];
+	int distinguish[9];
+	int nl = src.rows;
+	int nc = src.cols;
+	bool inOddIterations = true;
+	int loop_num = 0;
+	int threshold = 255;
+	int offset = 0;
+	Mat M = Mat::zeros(nl / coresize, nc / coresize, CV_8UC1);
+	//resize the origin img into a corase map named M
+	for (int j = 0; j < nl; j++) {
+		S_line = src.ptr<uchar>(j);
+		M_line = M.ptr<uchar>(j / coresize);
+		for (int i = 0; i < nc; i++) {
+			if (S_line[i] == 255) {
+				M_line[i / coresize] = 255;
+			}
+		}
+	}
+	chao_thinimage(M, 1);
+	
+	for (int j = 0; j < nl; j++) {
+		S_line = src.ptr<uchar>(j);
+		M_line = M.ptr<uchar>(j / coresize);
+		for (int i = 0; i < nc; i++) {
+			if (M_line[i / coresize] == 255)
+				S_line[i] = S_line[i];	//mask operation
+			else
+				S_line[i] = 0;
+		}
+	}
+
+	// fine thin
+	chao_thinimage(src, 1);
+	//imshow("resized",src);
+	//waitKey(1000);
 }
 
 int least_square_method(Mat &src, float *theta, float *b)

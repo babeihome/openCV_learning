@@ -13,5 +13,6 @@ int analysis(Mat &origin_img, vector < pair < float, float >> &kb, int method_co
 void MedianFlitering(Mat &src, Mat &dst);
 void chao_thinimage(Mat &srcimage, int coreSize);//单通道、二值化后的图像;
 void thinImage_alt(Mat &srcImg, int coresize, int loop_times);//可变核大小zhangsuen细化
-void thinImage_alt_2(Mat &srcImg, int coresize, int loop_times)//可变核大小zhangsuen细化，降低分辨率
+void thinImage_alt_2(Mat &srcImg, int coresize, int loop_times);//可变核大小zhangsuen细化，降低分辨率
+void thinImage_resize(Mat &src, int coresize);//核不变，建立resized image mask,对mask进行操作
 
