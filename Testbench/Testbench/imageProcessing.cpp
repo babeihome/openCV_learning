@@ -68,7 +68,7 @@ void thinning(Mat &origin_img, Mat &dst_img, int method_code) {
 		break;
 	case 2:
 		dst_img = origin_img.clone();
-		thinImage_alt(dst_img, 8, 100);
+		//thinImage_alt(dst_img, 8, 100);
 		//thinImage_alt(dst_img, 4, 5);
 		thinImage_alt(dst_img, 2, 100);
 		//thinImage_alt(dst_img, 1, 200);
@@ -77,7 +77,11 @@ void thinning(Mat &origin_img, Mat &dst_img, int method_code) {
 		break;
 	case 3:
 		dst_img = origin_img.clone();
-		thinImage_alt_2(dst_img,8,200);
+		thinImage_alt_2(dst_img, 2, 100);
+		break;
+	case 4:
+		dst_img = origin_img.clone();
+		thinImage_resize(dst_img, 8);
 		break;
 	default: cout << "no this method, sorry" << endl;
 		break;
@@ -588,6 +592,12 @@ void thinImage_alt(Mat &srcImg, int coresize, int loop_times) {
 	int loop_num = 0;
 	int threshold = 255;
 	int offset = 0;
+	double start, stop,duration,duration1,duration2;
+	start = 0;
+	stop = 0;
+	duration1 = 0;
+	duration2 = 0;
+	duration = 0;
 	while (true) {
 		/*if (offset < coresize) {
 			offset++;
@@ -600,10 +610,13 @@ void thinImage_alt(Mat &srcImg, int coresize, int loop_times) {
 		loop_num++;
 		for (int j = (upsize + offset); j < (nl - downsize - 1); j = j + coresize)
 		{
+			start = clock();
 			// get the data array, n1 is the offset of rows
 			for (int n1 = -coresize; n1 < 2 * coresize; n1++) {
 				groupdata[coresize + n1] = srcImg.ptr<uchar>(j + n1);
 			}
+			stop = clock();
+			duration += stop - start;
 			/*
 			for (int n1 = 1; n1 <= upsize; n1++) {
 				groupdata[upsize - n1] = srcImg.ptr<uchar>(j - n1);
@@ -614,6 +627,7 @@ void thinImage_alt(Mat &srcImg, int coresize, int loop_times) {
 			}
 			*/
 			for (int i = upsize + offset; i < (nc - downsize); i = i + coresize) {
+				start = clock();
 				for (int n4 = 0; n4 <= 8; n4++)
 					distinguish[n4] = 0;  //initialize the distinguish				
 				for (int n2 = 0; n2 < coresize; n2++) {	//n2 is offset of rows
@@ -629,7 +643,10 @@ void thinImage_alt(Mat &srcImg, int coresize, int loop_times) {
 						distinguish[8] += groupdata[n2][i - coresize + n3];
 					}
 				}
+				stop = clock();
+				duration1 += (stop - start);
 
+				start = clock();
 				if (distinguish[0] >= threshold) {
 					int whitePointCount = 0;
 					neighbourhood[0] = 1;
@@ -682,8 +699,14 @@ void thinImage_alt(Mat &srcImg, int coresize, int loop_times) {
 						}
 					}
 				}
+				stop = clock();
+				duration2 += (stop - start);
 			}
 		}
+		std::cout << "sum c*c core into 1 pixel done:" << duration1 / CLK_TCK << "s" << std::endl;
+		std::cout << "logic judge,get delete list:" << duration2 / CLK_TCK << "s" << std::endl;
+		std::cout << "get groupdata done:" << duration / CLK_TCK << "s" << std::endl;
+
 		if (deleteList.size() == 0 | loop_num > loop_times)
 			break;
 		for (size_t i = 0; i < deleteList.size(); i++) {
@@ -718,119 +741,112 @@ void thinImage_alt_2(Mat &srcImg, int coresize, int loop_times) {
 	int loop_num = 0;
 	int threshold = 255;
 	int offset = 0;
-	Mat M(nl / coresize + 5, nc / coresize + 5, CV_8UC1);
-	for (int j = (upsize + coresize); j < (nl - downsize - 1); j = j + 3 * coresize)
-	{
-		// get the data array, n1 is the offset of rows
-		for (int n1 = -coresize; n1 < 2 * coresize; n1++) {
-			groupdata[coresize + n1] = srcImg.ptr<uchar>(j + n1);
-		}
-		for (int i = upsize + coresize; i < (nc - downsize - 1); i = i + 3 * coresize) {
-			for (int n4 = 0; n4 <= 8; n4++)
-				distinguish[n4] = 0;  //initialize the distinguish				
-			for (int n2 = 0; n2 < coresize; n2++) {	//n2 is offset of rows
-				for (int n3 = 0; n3 < coresize; n3++) {	//n3 is offset of columns
-					distinguish[0] += groupdata[coresize + n2][i + n3];
-					distinguish[1] += groupdata[n2][i + n3];
-					distinguish[2] += groupdata[n2][i + coresize + n3];
-					distinguish[3] += groupdata[coresize + n2][i + coresize + n3];
-					distinguish[4] += groupdata[2 * coresize + n2][i + coresize + n3];
-					distinguish[5] += groupdata[2 * coresize + n2][i + n3];
-					distinguish[6] += groupdata[2 * coresize + n2][i - coresize + n3];
-					distinguish[7] += groupdata[coresize + n2][i - coresize + n3];
-					distinguish[8] += groupdata[n2][i - coresize + n3];
-				}
-
-			}
-			if (distinguish[0] >= threshold) M.at<uchar>(j / coresize, i / coresize) = 255;
-			else  M.at<uchar>(j / coresize, i / coresize) = 0;
-			if (distinguish[1] >= threshold) M.at<uchar>(j / coresize - 1, i / coresize) = 255;
-			else  M.at<uchar>(j / coresize - 1, i / coresize) = 0;
-			if (distinguish[2] >= threshold) M.at<uchar>(j / coresize - 1, i / coresize + 1) = 255;
-			else M.at<uchar>(j / coresize - 1, i / coresize + 1) = 0;
-			if (distinguish[3] >= threshold) M.at<uchar>(j / coresize, i / coresize + 1) = 255;
-			else  M.at<uchar>(j / coresize, i / coresize + 1) = 0;
-			if (distinguish[4] >= threshold) M.at<uchar>(j / coresize + 1, i / coresize + 1) = 255;
-			else  M.at<uchar>(j / coresize + 1, i / coresize + 1) = 0;
-			if (distinguish[5] >= threshold) M.at<uchar>(j / coresize + 1, i / coresize) = 255;
-			else  M.at<uchar>(j / coresize + 1, i / coresize) = 0;
-			if (distinguish[6] >= threshold) M.at<uchar>(j / coresize + 1, i / coresize - 1) = 255;
-			else  M.at<uchar>(j / coresize + 1, i / coresize - 1) = 0;
-			if (distinguish[7] >= threshold) M.at<uchar>(j / coresize, i / coresize - 1) = 255;
-			else  M.at<uchar>(j / coresize, i / coresize - 1) = 0;
-			if (distinguish[8] >= threshold) M.at<uchar>(j / coresize - 1, i / coresize - 1) = 255;
-			else  M.at<uchar>(j / coresize - 1, i / coresize - 1) = 0;
-		}
-	}
+	Mat M(nc / coresize, nl / coresize,CV_8UC1);
 	while (true) {
 		loop_num++;
-		for (int j = 1; j < (M.rows - 1); j++) {
-			uchar* data_last = M.ptr<uchar>(j - 1);
-			uchar* data = M.ptr<uchar>(j);
-			uchar* data_next = M.ptr<uchar>(j + 1);
-			for (int i = 1; i < (M.cols - 1); i++) {
-				if (data[i] == 255) {
-					int whitePointCount = 0;
-					neighbourhood[0] = 1;
-					if (data_last[i] == 255) neighbourhood[1] = 1;
-					else  neighbourhood[1] = 0;
-					if (data_last[i + 1] == 255) neighbourhood[2] = 1;
-					else  neighbourhood[2] = 0;
-					if (data[i + 1] == 255) neighbourhood[3] = 1;
-					else  neighbourhood[3] = 0;
-					if (data_next[i + 1] == 255) neighbourhood[4] = 1;
-					else  neighbourhood[4] = 0;
-					if (data_next[i] == 255) neighbourhood[5] = 1;
-					else  neighbourhood[5] = 0;
-					if (data_next[i - 1] == 255) neighbourhood[6] = 1;
-					else  neighbourhood[6] = 0;
-					if (data[i - 1] == 255) neighbourhood[7] = 1;
-					else  neighbourhood[7] = 0;
-					if (data_last[i - 1] == 255) neighbourhood[8] = 1;
-					else  neighbourhood[8] = 0;
-					for (int k = 1; k < 9; k++) {
-						whitePointCount += neighbourhood[k];
+		for (int j = (upsize + offset); j < (nl - downsize - 1); j = j + 3 * coresize)
+		{
+			// get the data array, n1 is the offset of rows
+			for (int n1 = -coresize; n1 < 2 * coresize; n1++) {
+				groupdata[coresize + n1] = srcImg.ptr<uchar>(j + n1);
+			}			
+			for (int i = upsize; i < (nc - downsize); i = i + 3 * coresize) {
+				for (int n4 = 0; n4 <= 8; n4++)
+					distinguish[n4] = 0;  //initialize the distinguish				
+				for (int n2 = 0; n2 < coresize; n2++) {	//n2 is offset of rows
+					for (int n3 = 0; n3 < coresize; n3++) {	//n3 is offset of columns
+						distinguish[0] += groupdata[coresize + n2][i + n3];
+						distinguish[1] += groupdata[n2][i + n3];
+						distinguish[2] += groupdata[n2][i + coresize + n3];
+						distinguish[3] += groupdata[coresize + n2][i + coresize + n3];
+						distinguish[4] += groupdata[2 * coresize + n2][i + coresize + n3];
+						distinguish[5] += groupdata[2 * coresize + n2][i + n3];
+						distinguish[6] += groupdata[2 * coresize + n2][i - coresize + n3];
+						distinguish[7] += groupdata[coresize + n2][i - coresize + n3];
+						distinguish[8] += groupdata[n2][i - coresize + n3];
 					}
-					if ((whitePointCount >= 2) && (whitePointCount <= 6)) {
-						int ap = 0;
-						if ((neighbourhood[1] == 0) && (neighbourhood[2] == 1)) ap++;
-						if ((neighbourhood[2] == 0) && (neighbourhood[3] == 1)) ap++;
-						if ((neighbourhood[3] == 0) && (neighbourhood[4] == 1)) ap++;
-						if ((neighbourhood[4] == 0) && (neighbourhood[5] == 1)) ap++;
-						if ((neighbourhood[5] == 0) && (neighbourhood[6] == 1)) ap++;
-						if ((neighbourhood[6] == 0) && (neighbourhood[7] == 1)) ap++;
-						if ((neighbourhood[7] == 0) && (neighbourhood[8] == 1)) ap++;
-						if ((neighbourhood[8] == 0) && (neighbourhood[1] == 1)) ap++;
-						if (ap == 1) {
-							if (inOddIterations && (neighbourhood[3] * neighbourhood[5] * neighbourhood[7] == 0)
-								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[5] == 0)) {
-								deleteList.push_back(Point(i, j));
-							}
-							else if (!inOddIterations && (neighbourhood[1] * neighbourhood[5] * neighbourhood[7] == 0)
-								&& (neighbourhood[1] * neighbourhood[3] * neighbourhood[7] == 0)) {
-								deleteList.push_back(Point(i, j));
-							}
-						}
-					}
-				}
+				
+				}	
+				if (distinguish[0] >= threshold) M.at<uchar>(i/coresize, j/coresize) = 255;
+				else  M.at<uchar>(i/coresize, j/coresize) = 0;
+				if (distinguish[1] >= threshold) M.at<uchar>(i/coresize - 1, j/coresize) = 255;
+				else  M.at<uchar>(i/coresize - coresize, j/coresize) = 0;
+				if (distinguish[2] >= threshold) M.at<uchar>(i/coresize - 1, j/coresize + 1) = 255;
+				else M.at<uchar>(i/coresize - coresize, j/coresize + coresize) = 0;
+				if (distinguish[3] >= threshold) M.at<uchar>(i/coresize, j/coresize + 1) = 255;
+				else  M.at<uchar>(i/coresize, j/coresize + coresize) = 0;
+				if (distinguish[4] >= threshold) M.at<uchar>(i/coresize + 1, j/coresize + 1) = 255;
+				else  M.at<uchar>(i/coresize + coresize, j/coresize + coresize) = 0;
+				if (distinguish[5] >= threshold) M.at<uchar>(i/coresize + 1, j/coresize) = 255;
+				else  M.at<uchar>(i/coresize + coresize, j/coresize) = 0;
+				if (distinguish[6] >= threshold) M.at<uchar>(i/coresize + 1, j/coresize - 1) = 255;
+				else  M.at<uchar>(i/coresize + coresize, j/coresize - coresize) = 0;
+				if (distinguish[7] >= threshold) M.at<uchar>(i/coresize, j/coresize - 1) = 255;
+				else  M.at<uchar>(i/coresize, j/coresize - coresize) = 0;
+				if (distinguish[8] >= threshold) M.at<uchar>(i/coresize - 1, j/coresize - 1) = 255;
+				else  M.at<uchar>(i/coresize - 1, j/coresize - 1) = 0;
 			}
 		}
+		imshow("small", M);
+		waitKey(200);
 		if (deleteList.size() == 0 | loop_num > loop_times)
 			break;
 		for (size_t i = 0; i < deleteList.size(); i++) {
 			Point tem;
 			tem = deleteList[i];
-			uchar* data = M.ptr<uchar>(tem.y);
+			uchar* data = srcImg.ptr<uchar>(tem.y);
 			data[tem.x] = 0;
 		}
 		deleteList.clear();
 
 		inOddIterations = !inOddIterations;
 		offset = !offset;
-		imshow("test3", M);
-		waitKey(200);
+		//imshow("test3", srcImg);
+		//waitKey(200);
 	}
-	srcImg = M;
+
+}
+
+void thinImage_resize(Mat &src, int coresize) {
+	vector<Point> deleteList;
+	uchar *S_line;
+	uchar *M_line;
+	int neighbourhood[9];
+	int distinguish[9];
+	int nl = src.rows;
+	int nc = src.cols;
+	bool inOddIterations = true;
+	int loop_num = 0;
+	int threshold = 255;
+	int offset = 0;
+	Mat M = Mat::zeros(nl / coresize, nc / coresize, CV_8UC1);
+	//resize the origin img into a corase map named M
+	for (int j = 0; j < nl; j++) {
+		S_line = src.ptr<uchar>(j);
+		M_line = M.ptr<uchar>(j / coresize);
+		for (int i = 0; i < nc; i++) {
+			if (S_line[i] == 255) {
+				M_line[i / coresize] = 255;
+			}
+		}
+	}
+	chao_thinimage(M, 1);
+	
+	for (int j = 0; j < nl; j++) {
+		S_line = src.ptr<uchar>(j);
+		M_line = M.ptr<uchar>(j / coresize);
+		for (int i = 0; i < nc; i++) {
+			if (M_line[i / coresize] == 255)
+				S_line[i] = S_line[i];	//mask operation
+			else
+				S_line[i] = 0;
+		}
+	}
+
+	// fine thin
+	chao_thinimage(src, 1);
+	//imshow("resized",src);
+	//waitKey(1000);
 }
 
 int least_square_method(Mat &src, float *theta, float *b)
