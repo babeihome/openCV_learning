@@ -77,7 +77,7 @@ void thinning(Mat &origin_img, Mat &dst_img, int method_code) {
 		break;
 	case 3:
 		dst_img = origin_img.clone();
-		thinImage_alt_2(dst_img,2,200);
+		thinImage_alt_2(dst_img,8,200);
 		break;
 	default: cout << "no this method, sorry" << endl;
 		break;
